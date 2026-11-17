@@ -42,6 +42,7 @@ export function reviewMontage({clips,peaks=[],motions=[],scenes=[]}){
   const mismatch=reliableA&&reliableB&&!sameMovement;
   const semantic=matchSemantic(scenes[i],scenes[i+1]);
   const beat=nearestBeat(peaks,time);
+  const nearbyBeat=beat&&beat.distance<=1.5?beat:null;
   const messages=[];
   let risk='не проверено';
   if(left.kind==='dissolve'){
@@ -53,11 +54,11 @@ export function reviewMontage({clips,peaks=[],motions=[],scenes=[]}){
   else messages.push('Данных о движении недостаточно для уверенного решения — не применять автоматический зум.');
   if(semantic===false)messages.push('Ведущие темы кадров различаются; это может быть допустимой сменой плана.');
   if(semantic===true)messages.push('Ведущие темы кадров похожи, но пространственную непрерывность это не гарантирует.');
-  if(beat){
-    if(beat.distance<=.25)messages.push('Рядом музыкальный акцент: '+absTime(beat.time)+' (расхождение '+beat.distance.toFixed(2)+' с).');
-    else messages.push('Ближайший найденный акцент: '+absTime(beat.time)+' (расхождение '+beat.distance.toFixed(2)+' с); сдвигать склейку без просмотра нельзя.');
-  }else messages.push('Музыкальные акценты ещё не найдены.');
-  return {join:i+1,time:+time.toFixed(3),risk,beat:beat&&{time:+beat.time.toFixed(3),distance:+beat.distance.toFixed(3)},messages,
+  if(nearbyBeat){
+    if(nearbyBeat.distance<=.25)messages.push('Рядом музыкальный акцент: '+absTime(nearbyBeat.time)+' (расхождение '+nearbyBeat.distance.toFixed(2)+' с).');
+    else messages.push('Ближайший найденный акцент: '+absTime(nearbyBeat.time)+' (расхождение '+nearbyBeat.distance.toFixed(2)+' с); сдвигать склейку без просмотра нельзя.');
+  }else messages.push(peaks?.length?'В пределах 1,5 с от стыка убедительного найденного акцента нет. Не подгонять склейку вслепую.':'Музыкальные акценты ещё не найдены.');
+  return {join:i+1,time:+time.toFixed(3),risk,beat:nearbyBeat&&{time:+nearbyBeat.time.toFixed(3),distance:+nearbyBeat.distance.toFixed(3)},messages,
     action:left.kind==='dissolve'?'Проверить, не заменить ли растворение жёсткой склейкой':'Оставить жёсткую склейку до визуальной проверки'};
  });
 }
