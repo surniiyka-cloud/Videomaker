@@ -131,7 +131,10 @@ header .actions button,header .actions .drop{font-size:11px;padding:7px 9px!impo
 <h2>AI DIRECTOR / TRANSFORMERS.JS</h2>
 <p class="hint muted">ИИ-модель CLIP анализирует начало и конец каждого клипа в браузере. Первый запуск скачивает модель; исходные видео не отправляются в GitHub.</p>
 <button class="primary" id="directorRun" type="button">✦ Анализировать сцены</button>
-<button id="motionRun" type="button">◈ Анализировать движение</button><p class="hint muted" id="motionStatus">Для оценки перемещения объектов и возможного параллакса.</p><div id="motionResults" style="display:grid;gap:7px;max-height:260px;overflow:auto"></div>
+<button id="motionRun" type="button">◈ Анализировать движение</button>
+<button type="button" id="reviewRun" class="primary">◆ Проверить монтаж</button>
+<div id="reviewStatus" class="hint muted" aria-live="polite">Проверка объединит результаты анализа и найденные музыкальные акценты.</div>
+<div id="reviewResults" style="display:grid;gap:8px;max-height:420px;overflow:auto"></div><p class="hint muted" id="motionStatus">Для оценки перемещения объектов и возможного параллакса.</p><div id="motionResults" style="display:grid;gap:7px;max-height:260px;overflow:auto"></div>
 <p class="hint muted" id="directorStatus" aria-live="polite">Ожидает запуска · экспериментальная функция</p>
 <div id="directorResults" style="display:grid;gap:7px;max-height:260px;overflow:auto"></div>
 </section>
@@ -520,6 +523,20 @@ document.getElementById('motionRun').addEventListener('click',async()=>{
   target.innerHTML=m.describeMotion(result);
   status.textContent='Готово. Показано экранное смещение, не точная траектория камеры. Результаты приблизительные.';
  }catch(e){status.textContent='Ошибка: '+String(e?.message||e)}
+ finally{btn.disabled=false}
+});
+
+document.getElementById('reviewRun').addEventListener('click',async()=>{
+ const btn=document.getElementById('reviewRun'),status=document.getElementById('reviewStatus'),
+ out=document.getElementById('reviewResults');btn.disabled=true;
+ try{
+  const m=await import('./edit_review.js');
+  const analysis=m.reviewMontage({clips,peaks,motions:window.vmMotionResults||[],scenes:window.vmDirectorResults||[]});
+  if(!analysis.length){status.textContent='Для проверки нужно минимум два клипа.';out.innerHTML='';return}
+  out.innerHTML=m.renderReview(analysis);
+  window.vmEditReview=analysis;
+  status.textContent='Проанализировано '+analysis.length+' стыков. Рекомендации не изменяют проект.';
+ }catch(e){status.textContent='Не удалось проверить монтаж: '+String(e?.message||e)}
  finally{btn.disabled=false}
 });
 
