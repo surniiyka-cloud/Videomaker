@@ -53,29 +53,33 @@ export function planMontage({clips,assets=[],peaks=[],songDuration=0,signals=[]}
  }
  // Beam search through transition choices: penalize repetition of flash/dip,
  // avoid unnecessary length reduction and avoid transition stacking.
- let beam=[{cuts:[],score:0,last:'cut',totalEffects:0}];
+ let beam=[{cuts:[],score:0,last:'cut',totalEffects:0,shift:0}];
  const baseLayout=montageLayout(prepared);
  for(let i=0;i<prepared.length-1;i++){
   const c=prepared[i],next=prepared[i+1],sig=signals[i]||{};
-  const cutAt=baseLayout.starts[i+1];
-  const beat=nearbyBeat(peaks,cutAt);
-  const beatDistance=beat?.distance??Infinity;
-  const choices=optionsForJoin({visualDifference:sig.visualDifference,
-    beatDistance,semanticSimilarity:sig.semanticSimilarity,hasMusic:songDuration>0&&peaks.length>0});
   const expanded=[];
-  for(const prev of beam)for(const choice of choices){
-   if(choice.kind!=='cut'&&(duration(c)<1||duration(next)<1))continue;
-   const effects=prev.totalEffects+(choice.kind==='cut'?0:1);
-   // prefer clean cuts; suppress sequences of cosmetic transitions.
-   const repetition=choice.kind!=='cut'&&prev.last!=='cut'?.15:0;
-   const abundance=effects>Math.max(1,Math.floor((prepared.length-1)/3))?.12*(effects-1):0;
-   // Penalty for shifting musical placement by overlap duration.
-   const displaced=choice.kind==='cut'?0:choice.transition;
-   const beatCost=(Number.isFinite(beatDistance)&&beatDistance<=.18)?
-      .22*limit(beatDistance+displaced,.0,.5):0;
-   expanded.push({cuts:[...prev.cuts,{...choice,cutAt,beat,visualDifference:sig.visualDifference??null}],
-     score:prev.score+choice.score-repetition-abundance-beatCost,
-     last:choice.kind,totalEffects:effects});
+  for(const prev of beam){
+   const prelim=baseLayout.starts[i+1]-prev.shift;
+   const currentBeat=nearbyBeat(peaks,prelim);
+   const choices=optionsForJoin({visualDifference:sig.visualDifference,
+     beatDistance:currentBeat?.distance??Infinity,semanticSimilarity:sig.semanticSimilarity,
+     hasMusic:songDuration>0&&peaks.length>0});
+   for(const choice of choices){
+    if(choice.kind!=='cut'&&(duration(c)<1||duration(next)<1))continue;
+    const overlap=choice.kind==='cut'?0:Math.min(choice.transition,duration(c)*.45,duration(next)*.45);
+    const actualCut=prelim-overlap;
+    const beat=nearbyBeat(peaks,actualCut);
+    const beatDistance=beat?.distance??Infinity;
+    const effects=prev.totalEffects+(choice.kind==='cut'?0:1);
+    // Protect musical synchronization and avoid flashy effects in rapid succession.
+    const repetition=choice.kind!=='cut'&&prev.last!=='cut'?.15:0;
+    const abundance=effects>Math.max(1,Math.floor((prepared.length-1)/3))?.12*(effects-1):0;
+    const beatCost=Number.isFinite(beatDistance)&&beatDistance<=.5?
+      .22*limit(beatDistance,0,.5):0;
+    expanded.push({cuts:[...prev.cuts,{...choice,cutAt:actualCut,beat,visualDifference:sig.visualDifference??null}],
+      score:prev.score+choice.score-repetition-abundance-beatCost,
+      last:choice.kind,totalEffects:effects,shift:prev.shift+overlap});
+   }
   }
   beam=expanded.sort((a,b)=>b.score-a.score).slice(0,12);
  }
