@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="application-version" content="4.11.0"><title>Videomaker — AI Music Film Studio</title><style>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="application-version" content="4.12.0"><title>Videomaker — AI Music Film Studio</title><style>
 :root{font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;color:#ecf0fb;background:#090e19}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 20% 0,#15233d 0,transparent 45%),#090e19}button,input,select{font:inherit}button{cursor:pointer;border:1px solid #374560;border-radius:9px;background:#1c293e;color:#e7eeff;padding:9px 12px}button:hover{border-color:#77a9f7;background:#25344e}button:disabled{opacity:.35;cursor:not-allowed}.primary{background:#f08b54;color:#180f0b;border:0;font-weight:750}.primary:hover{background:#ffac78}.subtle{background:transparent}.danger{color:#f8a5a5}.app{max-width:1600px;margin:auto;padding:20px 22px 50px}header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}h1{margin:0;font-size:23px;letter-spacing:-.6px}h2{margin:0 0 13px;font-size:14px}small,.muted{color:#91a0b8}.eyebrow{text-transform:uppercase;letter-spacing:1.4px;font-size:10px;color:#f0ab75}.actions{display:flex;gap:8px;flex-wrap:wrap}.layout{display:grid;grid-template-columns:minmax(290px,360px) minmax(0,1fr);gap:16px}.panel{background:#101827;border:1px solid #243149;border-radius:16px;padding:16px;min-width:0}.drop{display:block;border:1px dashed #4a6286;border-radius:12px;padding:20px 12px;text-align:center;cursor:pointer;background:#141f30}.drop:hover{border-color:#f0ab75}.drop input{display:none}.hint{font-size:12px;line-height:1.6}.assets{max-height:430px;overflow:auto;margin-top:10px;display:grid;gap:7px}.asset{display:flex;align-items:center;gap:9px;background:#162237;border:1px solid #2a3750;border-radius:10px;padding:8px;min-width:0}.thumb{width:75px;aspect-ratio:16/9;background:#0a101c;object-fit:cover;border-radius:5px}.asset .meta{flex:1;min-width:0}.truncate{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mini{padding:5px 8px;font-size:12px}.stage{aspect-ratio:16/9;background:#03060b;border-radius:12px;position:relative;overflow:hidden;border:1px solid #34415b}.stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}.stage .placeholder{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;color:#96a6c1}.playbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0}.time{font-variant-numeric:tabular-nums;font-size:13px;color:#cfdbef}.progress{width:100%;accent-color:#f6a06c}.full{grid-column:1/-1}.timeline{position:relative;background:#0b1423;border:1px solid #2d405c;border-radius:11px;overflow-x:auto;min-height:155px;padding:12px 10px}.ruler{position:relative;height:27px;border-bottom:1px solid #33445e;min-width:500px}.ruler span{position:absolute;font-size:10px;color:#7d8da6;transform:translateX(-50%)}.track{position:relative;height:54px;margin-top:12px;min-width:500px;background:repeating-linear-gradient(90deg,transparent,transparent 99px,#15223b 100px)}.segment{position:absolute;height:44px;top:4px;border-radius:6px;background:linear-gradient(125deg,#394b6e,#253d58);border:1px solid #7d96b9;padding:5px;overflow:hidden;cursor:pointer;font-size:12px;white-space:nowrap;text-overflow:ellipsis}.segment.selected{border:2px solid #ff9d6f}.segment .duration{font-size:10px;color:#c1d1e7}.musicTrack{height:24px;margin-top:10px;position:relative;background:#162c36;border-radius:5px;min-width:500px}.musicTrack .wave{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 5px,#285c70 5px 7px);opacity:.65}.cursor{position:absolute;top:20px;bottom:0;border-left:2px solid #ff9d6f;pointer-events:none;z-index:10}.badge{display:inline-block;background:#263449;color:#bcd0eb;font-size:11px;padding:3px 7px;border-radius:6px}.cliprow{display:grid;grid-template-columns:22px 72px minmax(100px,1fr) 70px 80px 75px 115px 32px;align-items:center;gap:8px;border-bottom:1px solid #253149;padding:10px 0;font-size:12px}.cliprow input,.cliprow select{min-width:0;max-width:100%;background:#111b2c;border:1px solid #374760;color:#fff;border-radius:6px;padding:6px}.cliprow img{width:72px;aspect-ratio:16/9;object-fit:cover;border-radius:4px}.cliprow.active{background:#19243a}.frames{display:grid;grid-template-columns:1fr 1fr;gap:10px}.frame{min-width:0}.frame img{width:100%;aspect-ratio:16/9;object-fit:contain;background:#03060c;border-radius:7px}.frame button{margin-top:5px}.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.toast{position:fixed;bottom:20px;right:20px;background:#1d3444;border:1px solid #668eb2;border-radius:12px;padding:14px 18px;max-width:420px;box-shadow:0 12px 45px #0008;display:none;z-index:999}.info{background:#162238;padding:12px;border-radius:9px;color:#b9c9df;font-size:12px;line-height:1.55}label.check{display:flex;gap:8px;align-items:center;font-size:12px}input[type=range]{accent-color:#f49b6a}.split{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:15px}.foot{font-size:11px;color:#8292a9;margin-top:12px}.status{font-size:12px;color:#f3ac79}.pill{display:flex;gap:8px;align-items:center}.hidden{display:none}@media(max-width:1100px){.layout,.split{grid-template-columns:1fr}.cliprow{grid-template-columns:20px 60px minmax(100px,1fr) 65px 65px 65px 100px 30px}}@media(max-width:650px){.app{padding:10px}.panel{padding:11px}.cliprow{overflow-x:auto;min-width:670px}.cliplist{overflow-x:auto}.frames{grid-template-columns:1fr}}
 
 /* Videomaker Studio 4 / editing workspace */
@@ -123,7 +123,7 @@ header .actions button,header .actions .drop{font-size:11px;padding:7px 9px!impo
 #zoomEditor label.check{display:grid;grid-template-columns:120px minmax(60px,1fr) 50px;gap:8px;margin:10px 0;align-items:center}
 #zoomEditor label.check input[type=range]{width:100%!important;min-width:0}
 #gradeStatus{margin-top:9px}
-</style></head><body><div class="app"><header><div><div class="eyebrow">VIDEOMAKER / CREATIVE WORKSPACE · <strong id="appVersion" style="color:#fff;background:#324766;border-radius:5px;padding:2px 6px">v4.11.0</strong> <span style="opacity:.7">· сборка 2026-11-17.6</span></div><h1>VIDEOMAKER <span>/</span> STUDIO</h1><small>Монтажная · исходники · музыка · AI Director <span id="aiModuleVersion" style="color:#f3b88d">· модуль проверки: не загружен</span></small></div><div class="actions"><span id="autosaveStatus" style="font-size:12px;color:#a8c5a8">◌ Восстановление…</span><button id="clearVideos" title="Удалить только загруженные видео и клипы, оставив музыку">✕ Удалить все видео</button><button id="resetLocal" title="Удалить локально сохранённый проект">Очистить проект</button><button id="aiReport">↓ AI-отчёт по монтажу</button><button id="aiPackage" class="primary">↓ Пакет для ChatGPT ZIP</button><button id="save">↓ Проект JSON</button><label class="drop" style="padding:9px 12px;border-style:solid">↑ Открыть проект<input id="loadProject" type="file" accept=".json"></label><select id="exportFormat" title="Формат экспорта" aria-label="Формат экспорта" style="max-width:144px"><option value="auto">MP4 / WebM</option><option value="webm">WebM</option></select><button class="primary" id="export">Экспорт видео</button></div></header>
+</style></head><body><div class="app"><header><div><div class="eyebrow">VIDEOMAKER / CREATIVE WORKSPACE · <strong id="appVersion" style="color:#fff;background:#324766;border-radius:5px;padding:2px 6px">v4.12.0</strong> <span style="opacity:.7">· сборка 2026-11-17.7</span></div><h1>VIDEOMAKER <span>/</span> STUDIO</h1><small>Монтажная · исходники · музыка · AI Director <span id="aiModuleVersion" style="color:#f3b88d">· модуль проверки: не загружен</span></small></div><div class="actions"><span id="autosaveStatus" style="font-size:12px;color:#a8c5a8">◌ Восстановление…</span><button id="clearVideos" title="Удалить только загруженные видео и клипы, оставив музыку">✕ Удалить все видео</button><button id="resetLocal" title="Удалить локально сохранённый проект">Очистить проект</button><button id="aiReport">↓ AI-отчёт по монтажу</button><button id="aiPackage" class="primary">↓ Пакет для ChatGPT ZIP</button><button id="save">↓ Проект JSON</button><label class="drop" style="padding:9px 12px;border-style:solid">↑ Открыть проект<input id="loadProject" type="file" accept=".json"></label><select id="exportFormat" title="Формат экспорта" aria-label="Формат экспорта" style="max-width:144px"><option value="auto">MP4 / WebM</option><option value="webm">WebM</option></select><button class="primary" id="export">Экспорт видео</button></div></header>
 <div class="layout"><aside class="panel"><h2>МЕДИАТЕКА <span class="badge">01</span></h2><label class="drop">＋ Добавить видео (MP4, WebM, MOV*)<input id="addVideos" type="file" multiple accept="video/*,.mov"></label><label class="drop" style="margin-top:8px">📁 Загрузить целую папку с видео и музыкой<input id="addFolder" type="file" webkitdirectory directory multiple></label><p class="hint muted">Файлы остаются в браузере. Выбирай клипы в порядке монтажа или меняй их ниже. *MOV зависит от поддержки браузера.</p><div id="assets" class="assets"></div><div style="margin-top:20px"><h2>АУДИО <span class="badge">02</span></h2><label class="drop">♫ Загрузить песню (WAV, MP3, M4A)<input id="addAudio" type="file" accept="audio/*"></label><p id="audioName" class="hint muted">Музыка не загружена</p><div class="toolbar"><button class="mini" id="auto">Авторасстановка</button><button class="mini" id="smartEdit">◈ Подобрать границы</button><button class="mini" id="undoSmart" disabled>↶ Отменить подгонку</button><button class="mini" id="beats">Найти акценты</button></div><p class="hint muted">Локальная подгонка помогает искать точки резкой склейки. Для полноценного автоматического монтажа используй движок Montage AI ниже.</p></div></aside>
 <main class="panel"><div class="toolbar" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">ПРОГРАММНЫЙ МОНИТОР</h2><span class="status" id="status">Ожидаю исходники</span></div><div class="stage" id="stage"><video id="v1" playsinline preload="auto" muted></video><video id="v2" playsinline preload="auto" muted style="opacity:0"></video><div class="placeholder" id="placeholder">Загрузи первые ролики и песню<br>Чтобы увидеть фильм на монтажной шкале</div></div><div class="playbar"><button id="play">▶ Воспроизвести</button><button id="stop">■</button><span class="time" id="time">00:00.00 / 00:00.00</span><label class="check"><input type="checkbox" id="mute"> Без музыки</label><label class="check">Громкость <input id="volume" type="range" min="0" max="1" step="0.05" value="0.8"></label></div><input id="seek" class="progress" type="range" min="0" max="1" step=".01" value="0"><audio id="audio" preload="auto"></audio><div class="info" style="margin-top:12px">🎞 <b>Проверка переходов:</b> выбери два соседних клипа. Для плавного перехода лучше совпадение направления движения, горизонта и масштаба. Автоматическое растворение сглаживает стык, но не создаёт физически непрерывный пролёт камеры.</div></main>
 <section class="panel full"><div class="toolbar" style="justify-content:space-between"><h2>ТАЙМЛАЙН <span class="badge">VIDEO 1 + AUDIO 1</span></h2><div class="toolbar"><span class="badge" id="totalLabel">0 клипов</span><button class="mini" id="fitMusic">Подогнать последний под песню</button></div></div><div class="timeline" id="timeline"><div class="ruler" id="ruler"></div><div class="track" id="track"></div><div class="musicTrack" id="musicTrack"><div class="wave"></div></div><div class="cursor" id="cursor"></div></div><div class="foot">Кликни по клипу на шкале, чтобы выбрать его. Для точной подгонки меняй обрезку и переходы в списке. Шкала перерисовывается автоматически.</div></section>
@@ -138,7 +138,11 @@ header .actions button,header .actions .drop{font-size:11px;padding:7px 9px!impo
 <p class="hint muted" id="directorStatus" aria-live="polite">Ожидает запуска · экспериментальная функция</p>
 <div id="directorResults" style="display:grid;gap:7px;max-height:260px;overflow:auto"></div>
 </section>
-<div class="info" id="smartSummary" style="margin-top:10px">Автоанализ ещё не проводился.</div><div id="zoomEditor" class="zoomEditor" style="margin-top:14px"></div></aside></div></section></div><div class="foot">Videomaker MVP · Обработка локально, видео не отправляются на сервер · Экспорт WebM идёт в реальном времени; для финального MP4/H.264 при необходимости перекодируй файл в редакторе.</div></div><div class="toast" id="toast"></div>
+<div class="info" id="smartSummary" style="margin-top:10px">Автоанализ ещё не проводился.</div><section id="draftStudio" style="margin:12px 0;padding:12px;border:1px solid #33445d;border-radius:10px">
+<h2>✦ AI DIRECTOR · ЧЕРНОВОЙ МОНТАЖ</h2>
+<p class="hint muted">Сохранит порядок сцен, предложит щадящую подгонку под музыку и позволит убрать ненужный фрагмент внутри ролика. Объекты не дорисовываются.</p>
+<button type="button" id="draftOpen" class="primary">Собрать черновик и очистить лишнее</button>
+<div id="draftContents"></div></section><div id="zoomEditor" class="zoomEditor" style="margin-top:14px"></div></aside></div></section></div><div class="foot">Videomaker MVP · Обработка локально, видео не отправляются на сервер · Экспорт WebM идёт в реальном времени; для финального MP4/H.264 при необходимости перекодируй файл в редакторе.</div></div><div class="toast" id="toast"></div>
 <script>
 'use strict';
 const $=x=>document.getElementById(x), clips=[], assets=[];let audioUrl=null, vmAudioFile=null, selected=0, playing=false, frameHandle=0, startWall=0, startTime=0, playhead=0, peaks=[], exporting=false;
@@ -401,7 +405,7 @@ async function aiReport(){
  }catch(e){notice('Не получилось создать отчёт: '+e.message)}
  finally{$('aiReport').disabled=false}
 }
-function saveProject(){let data={format:'videomaker-v1',clips:clips.map(c=>({...c,file:aFor(c)?.file.name})),music:$('audio').dataset.filename||'',peaks,notes:'Видео и музыка локальные; после открытия JSON нужно заново выбрать файлы с теми же названиями.'};downloadUrl(URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})),'videomaker-project.json')}
+function saveProject(){if(vmBeatPreview){notice('Сначала примени или отмени черновик.');return}let data={format:'videomaker-v1',clips:clips.map(c=>({...c,file:aFor(c)?.file.name})),music:$('audio').dataset.filename||'',peaks,notes:'Видео и музыка локальные; после открытия JSON нужно заново выбрать файлы с теми же названиями.'};downloadUrl(URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})),'videomaker-project.json')}
 let pendingProject=null;async function loadProject(file){try{const p=JSON.parse(await file.text());if(p.format!=='videomaker-v1')throw Error('Неверный формат');pendingProject=p;applyProject();notice('Проект загружен. Если исходников не хватает — добавь их, сохранив названия.')}catch(e){notice('Не открылся проект: '+e.message)}}
 function applyProject(){if(!pendingProject)return;const p=pendingProject;if(!p.clips.every(c=>assets.some(a=>a.file.name===c.file))){return}clips.splice(0,clips.length,...p.clips.map(c=>({...c,assetId:assets.find(a=>a.file.name===c.file).id})));peaks=p.peaks||[];selected=0;seek(0);render();pendingProject=null}
 function vmOutputFormat(){
@@ -595,6 +599,79 @@ document.getElementById('motionRun').addEventListener('click',async()=>{
 });
 
 let vmBeatModule=null,vmBeatSuggestions=[],vmBeatBackup=null,vmBeatPreview=false;
+
+let vmDraftModule=null,vmDraftPlan=null;
+function vmDraftCancel(){
+ if(!vmBeatPreview)return;
+ vmBeatRestore();
+ vmDraftPlan=null;
+ document.getElementById('draftDecision')?.remove();
+ notice('Черновик отменён, таймлайн восстановлен.');
+}
+document.getElementById('draftOpen').addEventListener('click',async()=>{
+ if(vmBeatPreview){notice('Сначала подтверди или отмени временные правки.');return}
+ if(!clips.length){notice('Сначала добавь видео');return}
+ try{
+  vmDraftModule=await import('./draft_editor.js?v=4.12.0');
+  vmDraftPlan=null;
+  document.getElementById('draftContents').innerHTML=vmDraftModule.draftPanel(clips);
+  document.getElementById('draftOpen').textContent='↻ Обновить список сцен';
+ }catch(e){notice('Не удалось загрузить сборщик: '+String(e?.message||e))}
+});
+document.getElementById('draftContents').addEventListener('click',e=>{
+ const target=e.target;
+ if(target.closest('#draftGenerate')){
+  if(vmBeatPreview){notice('Сначала заверши предпросмотр');return}
+  if(!vmDraftModule)return;
+  const edits={};
+  document.querySelectorAll('[data-draft-item]').forEach(row=>{
+    const id=Number(row.dataset.draftItem),
+      exclude=row.querySelector('[data-draft-exclude]')?.checked||false,
+      first=row.querySelector('[data-draft-start]')?.value||'',
+      last=row.querySelector('[data-draft-end]')?.value||'';
+    edits[id]={exclude,skipStart:first,skipEnd:last};
+  });
+  vmDraftPlan=vmDraftModule.buildDraft({clips,assets,peaks,edits});
+  const songDuration=$('audio').duration||0;
+  let text=vmDraftModule.draftSummary(vmDraftPlan);
+  if(songDuration>vmDraftPlan.newDuration+1)
+    text+='<p class="hint muted">На данный момент видеоряд короче песни на '+fmt(songDuration-vmDraftPlan.newDuration)+'. Новые сцены или сознательная пауза понадобятся позже. Повторять ролики автоматически не будем.</p>';
+  $('draftResult').innerHTML=text;
+  return;
+ }
+ if(target.closest('#draftTry')){
+  if(vmBeatPreview){notice('Сначала заверши текущий предпросмотр');return}
+  if(!vmDraftPlan?.clips.length)return;
+  if(!vmDraftPlan.changed){notice('Изменений не предложено — текущий монтаж уже соответствует настройкам.');return}
+  stop();clearTimeout(vmSaveTimer);
+  vmBeatBackup=clips.map(c=>({...c}));
+  vmBeatPreview=true;
+  clips.splice(0,clips.length,...vmDraftPlan.clips.map(c=>({...c})));
+  selected=Math.min(selected,clips.length-1);
+  render();seek(0);play();
+  const div=document.createElement('div');
+  div.id='draftDecision';
+  div.style.cssText='margin:10px 0;padding:10px;border:1px solid #e2a66c;background:#1d2637;border-radius:9px';
+  div.innerHTML='<b>Черновой монтаж воспроизводится</b><p class="hint">Изменения временные и не попадают в автосохранение, пока ты их не подтвердишь.</p><button type="button" class="mini primary" id="draftApply">Применить весь черновик</button> <button type="button" class="mini" id="draftCancel">Отменить</button>';
+  $('draftResult').appendChild(div);
+  return;
+ }
+ if(target.closest('#draftCancel')){vmDraftCancel();return}
+ if(target.closest('#draftApply')){
+  if(!vmBeatPreview||!vmBeatBackup)return;
+  stop();
+  vmBeforeSmart=vmBeatBackup.map(c=>({...c}));
+  $('undoSmart').disabled=false;
+  vmBeatBackup=null;vmBeatPreview=false;
+  $('draftDecision')?.remove();
+  vmDraftPlan=null;
+  $('draftContents').innerHTML='<p class="hint">Черновик применён. Для возврата используй «↶ Отменить подгонку».</p>';
+  window.vmEditReview=null;
+  render();vmSchedule();seek(0);
+  notice('Черновой монтаж применён и будет сохранён локально.');
+ }
+});
+
 let vmVisualSuggestions=[];
 function vmBeatRestore(){
  if(!vmBeatPreview||!vmBeatBackup)return;
@@ -647,7 +724,7 @@ document.getElementById('reviewResults').addEventListener('click',async e=>{
  btn.disabled=true;
  const status=document.getElementById('reviewStatus'),dest=document.getElementById('boundaryResults');
  try{
-  const mod=await import('./cut_optimizer.js?v=4.11.0');
+  const mod=await import('./cut_optimizer.js?v=4.12.0');
   vmVisualSuggestions=await mod.suggestBoundaries({clips,assets,review:window.vmEditReview,
    signature:(a,t)=>sampleSignature(a.url,t),
    distance:visualDistance,onProgress:t=>status.textContent=t});
@@ -676,10 +753,10 @@ document.getElementById('reviewRun').addEventListener('click',async()=>{
  const btn=document.getElementById('reviewRun'),status=document.getElementById('reviewStatus'),
  out=document.getElementById('reviewResults');btn.disabled=true;
  try{
-  const m=await import('./edit_review.js?v=4.11.0');
+  const m=await import('./edit_review.js?v=4.12.0');
   document.getElementById('aiModuleVersion').textContent='· модуль проверки: v'+(m.REVIEW_VERSION||'неизвестно');
   status.textContent='Сравниваю последние и первые кадры соседних клипов…';
-  const visualModule=await import('./visual_check.js?v=4.11.0');
+  const visualModule=await import('./visual_check.js?v=4.12.0');
   const visuals=await visualModule.inspectJoints(clips.slice(0,-1).map((clip,i)=>{
     const next=clips[i+1],a=aFor(clip),b=aFor(next);
     return {
@@ -687,7 +764,7 @@ document.getElementById('reviewRun').addEventListener('click',async()=>{
       captureRight:()=>grabFrame(b.url,Math.min(next.out-.04,next.in+.07))
     };
   }),x=>status.textContent=x);
-  const motionModule=await import('./motion_analysis.js?v=4.11.0');
+  const motionModule=await import('./motion_analysis.js?v=4.12.0');
   const jointMotions=await motionModule.analyzeJointMotion(clips.slice(0,-1).map((clip,i)=>{
     const next=clips[i+1],a=aFor(clip),b=aFor(next);
     const leftSpan=Math.min(.8,Math.max(.14,(clip.out-clip.in)*.7));
@@ -703,7 +780,7 @@ document.getElementById('reviewRun').addEventListener('click',async()=>{
   const analysis=m.reviewMontage({clips,peaks,motions:window.vmMotionResults||[],scenes:window.vmDirectorResults||[],visuals,jointMotions});
   if(!analysis.length){status.textContent='Для проверки нужно минимум два клипа.';out.innerHTML='';return}
   if(vmBeatPreview)vmBeatRestore();
-  vmBeatModule=await import('./beat_suggestions.js?v=4.11.0');
+  vmBeatModule=await import('./beat_suggestions.js?v=4.12.0');
   vmBeatSuggestions=vmBeatModule.makeSuggestions({clips,assets,review:analysis});
   out.innerHTML=m.renderReview(analysis)+vmBeatModule.previewSuggestionHtml(vmBeatSuggestions)+
     '<div style="margin:12px 0"><button class="primary" type="button" id="scanBoundaries">◈ Найти монтажные точки по кадрам</button><p class="hint muted">Сравнит несколько кадров у каждого стыка. Обрезки НЕ применяются без подтверждения.</p><div id="boundaryResults"></div></div>';
