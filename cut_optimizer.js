@@ -1,6 +1,6 @@
 // Conservative scan of a few local source frames around each edit.
 // This is frame-composition matching, not action recognition or camera tracking.
-export const OPTIMIZER_VERSION='0.2.0';
+export const OPTIMIZER_VERSION='0.2.1';
 const round=n=>+n.toFixed(3);
 function valid(c,asset,trim,side){
  if(!c||!asset)return false;
@@ -33,8 +33,10 @@ export async function suggestBoundaries({clips,assets,review,signature,distance,
      for(let x=0;x<optsL.length;x++)for(let y=0;y<optsR.length;y++){
        const endTrim=optsL[x],startTrim=optsR[y],visual=distance(fa[x],fb[y]);
        const beatTime=(report?.time||0)-endTrim;
-       const beatPenalty=Number.isFinite(beat)?Math.min(.35,Math.abs(beatTime-beat))*.018:0;
-       const score=visual+.013*(endTrim+startTrim)+beatPenalty;
+       // Never move a cut already near a found accent outside its musical window.
+       if(Number.isFinite(beat)&&Math.abs((report?.time||0)-beat)<=.12&&Math.abs(beatTime-beat)>.12)continue;
+       const beatPenalty=Number.isFinite(beat)?Math.min(.6,Math.abs(beatTime-beat))*.12:0;
+       const score=visual+.018*(endTrim+startTrim)+beatPenalty;
        const candidate={endTrim,startTrim,visual,score};
        scored.push(candidate);
        if(score<best.score)best=candidate;
