@@ -1,7 +1,7 @@
 // VIDEOMAKER DIRECTOR v1 — one-pass, conservative edit planning.
 // Pure planning code: browser decode and UI orchestration live in index.html.
 // Never claim a semantic defect was verified from image captions alone.
-export const DIRECTOR_VERSION='1.1.0';
+export const DIRECTOR_VERSION='1.2.0';
 const fmt=n=>(+n).toFixed(2);
 const limit=(x,a,b)=>Math.max(a,Math.min(b,x));
 const duration=c=>Math.max(0,c.out-c.in);
@@ -31,6 +31,12 @@ const num=(n,fallback)=>Number.isFinite(n)?n:fallback;
 function optionsForJoin({visualDifference,beatDistance,hasMusic,semanticSimilarity}){
  const opts=[{kind:'cut',transition:0,score:0,reason:'Чистая склейка сохраняет действие и не создаёт двойных контуров.'}];
  const diff=num(visualDifference,0);
+ // A motivated spatial handoff for a new location/subject. Unlike dissolve,
+ // the images never double-expose. It is an edit, not synthetic camera continuity.
+ if((Number.isFinite(semanticSimilarity)&&semanticSimilarity<.26)||diff>.17){
+  opts.push({kind:'push',transition:.65,score:.30+Math.min(.09,diff*.26),
+    reason:'Кинематографический сдвиг: предыдущий план уходит, следующий входит в том же направлении. Без наложения двух сцен.'});
+ }
  // Story/location changes benefit from a spatial reveal; unlike a full
  // dissolve it does not superimpose the city and the actor.
  if(Number.isFinite(semanticSimilarity)&&semanticSimilarity<.22){
@@ -122,7 +128,7 @@ export function planMontage({clips,assets=[],peaks=[],songDuration=0,signals=[]}
 }
 export function renderDirectorPlan(plan){
  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- const names={cut:'Жёсткая склейка',dip:'Короткое затемнение',flash:'Вспышка',wipe:'Мягкое раскрытие'};
+ const names={cut:'Жёсткая склейка',push:'Кинематографический сдвиг',wipe:'Мягкое раскрытие',dip:'Короткое затемнение',flash:'Вспышка',wipe:'Мягкое раскрытие'};
  return '<div class="hint" style="margin:10px 0"><b>Режиссёрская сборка · '+plan.clips.length+' сцен · '+
   fmt(plan.newDuration)+' с</b><p>'+esc(plan.summary)+'</p></div>'+
  plan.joins.map(j=>'<div class="hint" style="padding:8px;margin:6px 0;border:1px solid #36465e;border-radius:7px">'+
