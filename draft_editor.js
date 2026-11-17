@@ -1,5 +1,5 @@
 // Browser-only draft timeline builder. Never deletes source files or rewrites footage.
-export const DRAFT_VERSION='0.1.0';
+export const DRAFT_VERSION='0.2.0';
 const f=x=>Number(x).toFixed(2);
 const clone=x=>({...x});
 const span=c=>Math.max(0,c.out-c.in);
@@ -79,7 +79,8 @@ export function draftPanel(clips){
  '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px"><small>Вырезать внутри:</small>'+
  '<input type="number" step="0.01" min="'+c.in+'" max="'+c.out+'" placeholder="Начало, с" data-draft-start="'+i+'" style="width:115px">'+
  '<span>—</span><input type="number" step="0.01" min="'+c.in+'" max="'+c.out+'" placeholder="Конец, с" data-draft-end="'+i+'" style="width:115px">'+
- '<small>Диапазон ролика: '+f(c.in)+'–'+f(c.out)+' с</small></div></div>').join('')+
+ '<small>Диапазон ролика: '+f(c.in)+'–'+f(c.out)+' с</small></div>'+
+ '<button type="button" class="mini" style="margin-top:7px" data-draft-inspect="'+i+'">◈ Найти визуальные аномалии</button><div data-draft-scan-result="'+i+'" class="hint muted"></div></div>').join('')+
  '<div class="toolbar"><button type="button" class="primary" id="draftGenerate">✦ Собрать предложение</button></div>'+
  '<div id="draftResult" aria-live="polite" class="hint"></div>';
 }
