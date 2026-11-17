@@ -100,13 +100,17 @@ def render(archive: Path, output: Path, width=1920, height=1080, fps=24, crf=18)
         elapsed = durations[0]
         for i in range(1, len(clips)):
             prev = clips[i-1]
-            is_dissolve = prev.get('kind') == 'dissolve'
-            overlap = min(safe_number(prev.get('transition'), .3), durations[i-1]*.45, durations[i]*.45) if is_dissolve else 0.0
-            # Tiny xfade for cuts works as a hard cut visually, within 1 frame.
+            mode = prev.get('kind', 'cut')
+            effect = {'dissolve': 'fade', 'dip': 'fadeblack', 'flash': 'fadewhite'}.get(mode, 'fade')
+            transitional = mode in ('dissolve', 'dip', 'flash')
+            overlap = (min(max(0, safe_number(prev.get('transition'), .3)),
+                           durations[i-1]*.45, durations[i]*.45)
+                       if transitional else 0.0)
+            # Tiny xfade for cuts works visually as a hard cut (<=1 frame).
             ov = max(1/fps, overlap)
             offset = max(0, elapsed-ov)
             label = f'm{i}'
-            chains.append(f'[{last}][v{i}]xfade=transition=fade:duration={ov:.5f}:offset={offset:.5f}[{label}]')
+            chains.append(f'[{last}][v{i}]xfade=transition={effect}:duration={ov:.5f}:offset={offset:.5f}[{label}]')
             last = label
             elapsed += durations[i] - ov
         total = elapsed
