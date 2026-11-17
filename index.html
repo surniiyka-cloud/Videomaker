@@ -601,6 +601,7 @@ document.getElementById('motionRun').addEventListener('click',async()=>{
 let vmBeatModule=null,vmBeatSuggestions=[],vmBeatBackup=null,vmBeatPreview=false;
 
 let vmDraftModule=null,vmDraftPlan=null;
+let vmClipScanResults={};
 function vmDraftCancel(){
  if(!vmBeatPreview)return;
  vmBeatRestore();
@@ -613,13 +614,43 @@ document.getElementById('draftOpen').addEventListener('click',async()=>{
  if(!clips.length){notice('Сначала добавь видео');return}
  try{
   vmDraftModule=await import('./draft_editor.js?v=4.12.0');
-  vmDraftPlan=null;
+  vmDraftPlan=null;vmClipScanResults={};
   document.getElementById('draftContents').innerHTML=vmDraftModule.draftPanel(clips);
   document.getElementById('draftOpen').textContent='↻ Обновить список сцен';
  }catch(e){notice('Не удалось загрузить сборщик: '+String(e?.message||e))}
 });
 document.getElementById('draftContents').addEventListener('click',e=>{
  const target=e.target;
+
+ 
+ if(target.closest('[data-draft-inspect]')){
+  const btn=target.closest('[data-draft-inspect]'),i=Number(btn.dataset.draftInspect),
+    clip=clips[i],asset=aFor(clip),out=document.querySelector('[data-draft-scan-result="'+i+'"]');
+  if(!clip||!asset||vmBeatPreview)return;
+  btn.disabled=true;
+  (async()=>{
+   try{
+    const scan=await import('./clip_scan.js?v=4.12.0');
+    const result=await scan.scanClip({clip,asset,sample:(a,t)=>sampleSignature(a.url,t),
+      distance:visualDistance,progress:txt=>out.textContent=txt});
+    vmClipScanResults[i]=result.candidates;
+    out.innerHTML=scan.showScan(result,i);
+   }catch(err){out.textContent='Проверка не удалась: '+String(err?.message||err)}
+   finally{btn.disabled=false}
+  })();
+  return;
+ }
+ if(target.closest('[data-scan-choose]')){
+  const [i,k]=target.closest('[data-scan-choose]').dataset.scanChoose.split(':').map(Number);
+  const p=vmClipScanResults[i]?.[k];
+  const row=document.querySelector('[data-draft-item="'+i+'"]');
+  if(!p||!row)return;
+  row.querySelector('[data-draft-start]').value=p.start;
+  row.querySelector('[data-draft-end]').value=p.end;
+  notice('Диапазон заполнен. Проверь фрагмент перед применением.');
+  return;
+ }
+
  if(target.closest('#draftGenerate')){
   if(vmBeatPreview){notice('Сначала заверши предпросмотр');return}
   if(!vmDraftModule)return;
