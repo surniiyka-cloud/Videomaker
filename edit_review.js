@@ -44,7 +44,7 @@ export function reviewMontage({clips,peaks=[],motions=[],scenes=[]}){
   const beat=nearestBeat(peaks,time);
   const nearbyBeat=beat&&beat.distance<=1.5?beat:null;
   const messages=[];
-  let risk='не проверено';
+  let risk='визуально не проверено';
   if(left.kind==='dissolve'){
    risk='проверить вручную';
    messages.push('Растворение может двоить здания или персонажей. Без подтверждённой совместимости движения безопаснее жёсткая склейка.');
@@ -58,14 +58,16 @@ export function reviewMontage({clips,peaks=[],motions=[],scenes=[]}){
     if(nearbyBeat.distance<=.25)messages.push('Рядом музыкальный акцент: '+absTime(nearbyBeat.time)+' (расхождение '+nearbyBeat.distance.toFixed(2)+' с).');
     else messages.push('Ближайший найденный акцент: '+absTime(nearbyBeat.time)+' (расхождение '+nearbyBeat.distance.toFixed(2)+' с); сдвигать склейку без просмотра нельзя.');
   }else messages.push(peaks?.length?'В пределах 1,5 с от стыка убедительного найденного акцента нет. Не подгонять склейку вслепую.':'Музыкальные акценты ещё не найдены.');
-  return {join:i+1,time:+time.toFixed(3),risk,beat:nearbyBeat&&{time:+nearbyBeat.time.toFixed(3),distance:+nearbyBeat.distance.toFixed(3)},messages,
+  const rhythm=!peaks.length?'не анализировался':nearbyBeat?.distance<=.12?'рядом с акцентом (±0,12 с)':nearbyBeat?.distance<=.35?'близко к акценту (±0,35 с)':'точного акцента рядом нет';
+  return {join:i+1,time:+time.toFixed(3),risk,rhythm,beat:nearbyBeat&&{time:+nearbyBeat.time.toFixed(3),distance:+nearbyBeat.distance.toFixed(3)},messages,
     action:left.kind==='dissolve'?'Проверить, не заменить ли растворение жёсткой склейкой':'Оставить жёсткую склейку до визуальной проверки'};
  });
 }
 export function renderReview(items){
  return items.map(r=>'<article style="border:1px solid #353c54;padding:10px;border-radius:8px;margin-top:9px">'+
  '<b>Стык '+r.join+' → '+(r.join+1)+' · '+absTime(r.time)+'</b>'+
- '<div style="margin:5px 0;color:#d3ba92">Статус: '+clean(r.risk)+'</div>'+
- '<div><strong>'+clean(r.action)+'</strong></div>'+
+ '<div style="margin:5px 0;color:#d3ba92">Картинка: '+clean(r.risk)+' · Ритм: '+clean(r.rhythm)+'</div>'+
+ '<div><strong>'+clean(r.action)+'</strong></div>'+ 
+ '<div class="toolbar" style="margin:8px 0"><button class="mini" type="button" data-review-preview="'+r.time+'">▶ Просмотреть стык (±1,5 с)</button><button class="mini" type="button" data-review-seek="'+r.time+'">◉ Перейти к стыку</button></div>'+
  '<ul style="margin:6px 0 0;padding-left:18px">'+r.messages.map(x=>'<li>'+clean(x)+'</li>').join('')+'</ul></article>').join('');
 }
