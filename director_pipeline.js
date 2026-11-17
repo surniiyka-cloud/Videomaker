@@ -54,7 +54,8 @@ export function planMontage({clips,assets=[],peaks=[],songDuration=0,signals=[]}
  // Beam search through transition choices: penalize repetition of flash/dip,
  // avoid unnecessary length reduction and avoid transition stacking.
  let beam=[{cuts:[],score:0,last:'cut',totalEffects:0,shift:0}];
- const baseLayout=montageLayout(prepared);
+ const originalLayout=montageLayout(prepared);
+ const baseLayout=montageLayout(prepared.map(c=>({...c,kind:'cut',transition:0})));
  for(let i=0;i<prepared.length-1;i++){
   const c=prepared[i],next=prepared[i+1],sig=signals[i]||{};
   const expanded=[];
@@ -107,7 +108,7 @@ export function planMontage({clips,assets=[],peaks=[],songDuration=0,signals=[]}
  if(signals.some(s=>s?.error))warnings.push('Часть кадров не прочитана — для них выбраны безопасные склейки.');
  const changed=prepared.some((c,i)=>c.kind!==clips[i].kind||Math.abs((c.transition||0)-(clips[i].transition||0))>.001);
  return {clips:prepared,joins,warnings,changed,
-  originalDuration:baseLayout.total,newDuration:layout.total,
+  originalDuration:originalLayout.total,newDuration:layout.total,
   summary:'Сюжетный порядок и исходные границы кадров сохранены. Подобраны переходы для всей последовательности.'};
 }
 export function renderDirectorPlan(plan){
