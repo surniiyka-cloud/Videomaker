@@ -1,7 +1,7 @@
 // VIDEOMAKER DIRECTOR v1 — one-pass, conservative edit planning.
 // Pure planning code: browser decode and UI orchestration live in index.html.
 // Never claim a semantic defect was verified from image captions alone.
-export const DIRECTOR_VERSION='1.3.1';
+export const DIRECTOR_VERSION='1.3.2';
 const fmt=n=>(+n).toFixed(2);
 const limit=(x,a,b)=>Math.max(a,Math.min(b,x));
 const duration=c=>Math.max(0,c.out-c.in);
@@ -124,11 +124,11 @@ export function planMontage({clips,assets=[],peaks=[],songDuration=0,signals=[]}
 }
 export function renderDirectorPlan(plan){
  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- const names={cut:'Жёсткая склейка',push:'Кинематографический сдвиг',wipe:'Мягкое раскрытие',dip:'Короткое затемнение',flash:'Вспышка',wipe:'Мягкое раскрытие'};
+ const names={cut:'Жёсткая склейка',push:'Кинематографический сдвиг',wipe:'Мягкое раскрытие',dip:'Короткое затемнение',flash:'Вспышка'};
  return '<div class="hint" style="margin:10px 0"><b>Режиссёрская сборка · '+plan.clips.length+' сцен · '+
   fmt(plan.newDuration)+' с</b><p>'+esc(plan.summary)+'</p></div>'+
  plan.joins.map(j=>'<div class="hint" style="padding:8px;margin:6px 0;border:1px solid #36465e;border-radius:7px">'+
- '<b>Стык '+j.join+' → '+(j.join+1)+' · '+esc(names[j.kind]||j.kind)+'</b>'+
+ '<b>Стык '+j.join+' → '+(j.join+1)+' · '+esc(names[j.kind]||j.kind)+(j.transition?' · '+fmt(j.transition)+' с':'')+'</b>'+
  '<div>'+esc(j.reason)+'</div>'+
  '<button type="button" class="mini" style="margin:5px 0" data-one-join="'+(j.join-1)+'">▶ Посмотреть переход</button>'+
  (j.beat?'<small>Акцент: '+fmt(j.beat.time)+' с · расхождение '+fmt(j.beat.distance)+' с</small>':'')+
