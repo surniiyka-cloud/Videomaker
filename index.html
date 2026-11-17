@@ -591,9 +591,10 @@ document.getElementById('reviewResults').addEventListener('click',e=>{
  if(hit.hasAttribute('data-beat-cancel')){vmBeatRestore();notice('Монтаж восстановлен без изменений.');return}
  if(hit.hasAttribute('data-beat-apply')){
    if(!vmBeatPreview)return;
-   stop();vmBeatBackup=null;vmBeatPreview=false;
+   stop();vmBeforeSmart=vmBeatBackup.map(c=>({...c}));$('undoSmart').disabled=false;
+   vmBeatBackup=null;vmBeatPreview=false;
    document.getElementById('beatDecision')?.remove();
-   vmSchedule();notice('Сдвиг стыка применён. Можно отменить через сохранённый JSON проекта.');
+   vmSchedule();notice('Сдвиг применён. Для отката нажми «Отменить подгонку». Перезапусти проверку монтажа для новых таймкодов.');
    return;
  }
  if(vmBeatPreview){notice('Сначала примени или отмени текущий предпросмотр.');return}
