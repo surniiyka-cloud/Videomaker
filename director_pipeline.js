@@ -1,7 +1,7 @@
 // VIDEOMAKER DIRECTOR v1 — one-pass, conservative edit planning.
 // Pure planning code: browser decode and UI orchestration live in index.html.
 // Never claim a semantic defect was verified from image captions alone.
-export const DIRECTOR_VERSION='1.2.0';
+export const DIRECTOR_VERSION='1.3.0';
 const fmt=n=>(+n).toFixed(2);
 const limit=(x,a,b)=>Math.max(a,Math.min(b,x));
 const duration=c=>Math.max(0,c.out-c.in);
@@ -29,31 +29,27 @@ const num=(n,fallback)=>Number.isFinite(n)?n:fallback;
 // One candidate means NO CHANGE to source duration; rhythm and visual continuity
 // are balanced over the whole edit instead of greedily optimizing individual ends.
 function optionsForJoin({visualDifference,beatDistance,hasMusic,semanticSimilarity}){
- const opts=[{kind:'cut',transition:0,score:0,reason:'Чистая склейка сохраняет действие и не создаёт двойных контуров.'}];
  const diff=num(visualDifference,0);
- // A motivated spatial handoff for a new location/subject. Unlike dissolve,
- // the images never double-expose. It is an edit, not synthetic camera continuity.
- if((Number.isFinite(semanticSimilarity)&&semanticSimilarity<.26)||diff>.17){
-  opts.push({kind:'push',transition:.65,score:.30+Math.min(.09,diff*.26),
-    reason:'Кинематографический сдвиг: предыдущий план уходит, следующий входит в том же направлении. Без наложения двух сцен.'});
+ const known=Number.isFinite(visualDifference);
+ const storyChange=Number.isFinite(semanticSimilarity)&&semanticSimilarity<.26;
+ const closeBeat=hasMusic&&beatDistance<.07;
+ const opts=[{kind:'cut',transition:0,
+   score:closeBeat?.10:0,
+   reason:closeBeat?'Точная склейка на сильный музыкальный акцент.':'Чистая склейка без декоративной анимации.'}];
+ // A restrained cinematic transition, not a PowerPoint push or wipe.
+ // Avoid fade-on-fade across highly dissimilar frames to reduce ghosting.
+ if(known&&diff<.23){
+  opts.push({kind:'dissolve',transition:storyChange?.24:.32,
+    score:(storyChange?.21:.14)+Math.min(.045,diff*.15)-(closeBeat?.055:0),
+    reason:'Короткое кинематографическое растворение; планы мягко сменяются без перемещения экранных слоёв.'});
  }
- // Story/location changes benefit from a spatial reveal; unlike a full
- // dissolve it does not superimpose the city and the actor.
- if(Number.isFinite(semanticSimilarity)&&semanticSimilarity<.22){
-   opts.push({kind:'wipe',transition:.50,score:.23+Math.min(.10,diff*.3),
-     reason:'Смена сюжета или пространства: мягкое раскрытие следующего плана без двойного изображения.'});
- }else if(diff>.09){
-   opts.push({kind:'wipe',transition:.42,score:.075+Math.min(.09,diff*.32),
-     reason:'Мягкое раскрытие нового кадра вместо резкого скачка между планами.'});
+ if(storyChange||(known&&diff>=.18)){
+  opts.push({kind:'dip',transition:storyChange?.34:.26,
+    score:(known&&diff>.22?.24:.13)-(closeBeat?.05:0),
+    reason:'Смена места или композиции через краткое затемнение; избегает двоящихся контуров.'});
  }
- if(diff>.12){
-  opts.push({kind:'dip',transition:.20,score:(diff-.12)*2.0-.025-(Number.isFinite(semanticSimilarity)&&semanticSimilarity<.12?.06:0),
-    reason:'Короткое затемнение смягчает заметную смену изображения без наложения планов.'});
- }
- if(hasMusic&&beatDistance<=.075&&diff>.20){
-  opts.push({kind:'flash',transition:.12,score:(diff-.20)*.9-.045-(Number.isFinite(semanticSimilarity)&&semanticSimilarity<.12?.035:0),
-    reason:'Очень короткая вспышка попадает в музыкальный акцент; применять умеренно.'});
- }
+ // A flash has a narrative motivation only on a strong beat AND markedly bright action.
+ // Color-difference alone cannot establish that, so never add it automatically.
  return opts;
 }
 export function planMontage({clips,assets=[],peaks=[],songDuration=0,signals=[]}){
@@ -88,8 +84,8 @@ export function planMontage({clips,assets=[],peaks=[],songDuration=0,signals=[]}
     const beatDistance=beat?.distance??Infinity;
     const effects=prev.totalEffects+(choice.kind==='cut'?0:1);
     // Protect musical synchronization and avoid flashy effects in rapid succession.
-    const repetition=choice.kind!=='cut'&&prev.last!=='cut'?.09:0;
-    const abundance=effects>Math.max(1,Math.floor((prepared.length-1)/3))?.06*(effects-1):0;
+    const repetition=choice.kind!=='cut'&&prev.last!=='cut'?.04:0;
+    const abundance=effects>Math.max(1,Math.floor((prepared.length-1)/3))?.035*(effects-1):0;
     const beatCost=Number.isFinite(beatDistance)&&beatDistance<=.5?
       .22*limit(beatDistance,0,.5):0;
     expanded.push({cuts:[...prev.cuts,{...choice,cutAt:actualCut,beat,visualDifference:sig.visualDifference??null}],
