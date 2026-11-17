@@ -1,7 +1,7 @@
 // VIDEOMAKER DIRECTOR v1 — one-pass, conservative edit planning.
 // Pure planning code: browser decode and UI orchestration live in index.html.
 // Never claim a semantic defect was verified from image captions alone.
-export const DIRECTOR_VERSION='1.0.0';
+export const DIRECTOR_VERSION='1.1.0';
 const fmt=n=>(+n).toFixed(2);
 const limit=(x,a,b)=>Math.max(a,Math.min(b,x));
 const duration=c=>Math.max(0,c.out-c.in);
@@ -31,6 +31,15 @@ const num=(n,fallback)=>Number.isFinite(n)?n:fallback;
 function optionsForJoin({visualDifference,beatDistance,hasMusic,semanticSimilarity}){
  const opts=[{kind:'cut',transition:0,score:0,reason:'Чистая склейка сохраняет действие и не создаёт двойных контуров.'}];
  const diff=num(visualDifference,0);
+ // Story/location changes benefit from a spatial reveal; unlike a full
+ // dissolve it does not superimpose the city and the actor.
+ if(Number.isFinite(semanticSimilarity)&&semanticSimilarity<.22){
+   opts.push({kind:'wipe',transition:.50,score:.23+Math.min(.10,diff*.3),
+     reason:'Смена сюжета или пространства: мягкое раскрытие следующего плана без двойного изображения.'});
+ }else if(diff>.09){
+   opts.push({kind:'wipe',transition:.42,score:.075+Math.min(.09,diff*.32),
+     reason:'Мягкое раскрытие нового кадра вместо резкого скачка между планами.'});
+ }
  if(diff>.12){
   opts.push({kind:'dip',transition:.20,score:(diff-.12)*2.0-.025-(Number.isFinite(semanticSimilarity)&&semanticSimilarity<.12?.06:0),
     reason:'Короткое затемнение смягчает заметную смену изображения без наложения планов.'});
@@ -73,8 +82,8 @@ export function planMontage({clips,assets=[],peaks=[],songDuration=0,signals=[]}
     const beatDistance=beat?.distance??Infinity;
     const effects=prev.totalEffects+(choice.kind==='cut'?0:1);
     // Protect musical synchronization and avoid flashy effects in rapid succession.
-    const repetition=choice.kind!=='cut'&&prev.last!=='cut'?.15:0;
-    const abundance=effects>Math.max(1,Math.floor((prepared.length-1)/3))?.12*(effects-1):0;
+    const repetition=choice.kind!=='cut'&&prev.last!=='cut'?.09:0;
+    const abundance=effects>Math.max(1,Math.floor((prepared.length-1)/3))?.06*(effects-1):0;
     const beatCost=Number.isFinite(beatDistance)&&beatDistance<=.5?
       .22*limit(beatDistance,0,.5):0;
     expanded.push({cuts:[...prev.cuts,{...choice,cutAt:actualCut,beat,visualDifference:sig.visualDifference??null}],
@@ -113,7 +122,7 @@ export function planMontage({clips,assets=[],peaks=[],songDuration=0,signals=[]}
 }
 export function renderDirectorPlan(plan){
  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- const names={cut:'Жёсткая склейка',dip:'Короткое затемнение',flash:'Вспышка'};
+ const names={cut:'Жёсткая склейка',dip:'Короткое затемнение',flash:'Вспышка',wipe:'Мягкое раскрытие'};
  return '<div class="hint" style="margin:10px 0"><b>Режиссёрская сборка · '+plan.clips.length+' сцен · '+
   fmt(plan.newDuration)+' с</b><p>'+esc(plan.summary)+'</p></div>'+
  plan.joins.map(j=>'<div class="hint" style="padding:8px;margin:6px 0;border:1px solid #36465e;border-radius:7px">'+
