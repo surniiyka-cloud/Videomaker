@@ -1,7 +1,7 @@
 // VIDEOMAKER DIRECTOR v1 — one-pass, conservative edit planning.
 // Pure planning code: browser decode and UI orchestration live in index.html.
 // Never claim a semantic defect was verified from image captions alone.
-export const DIRECTOR_VERSION='1.3.0';
+export const DIRECTOR_VERSION='1.3.1';
 const fmt=n=>(+n).toFixed(2);
 const limit=(x,a,b)=>Math.max(a,Math.min(b,x));
 const duration=c=>Math.max(0,c.out-c.in);
@@ -39,12 +39,12 @@ function optionsForJoin({visualDifference,beatDistance,hasMusic,semanticSimilari
  // A restrained cinematic transition, not a PowerPoint push or wipe.
  // Avoid fade-on-fade across highly dissimilar frames to reduce ghosting.
  if(known&&diff<.23){
-  opts.push({kind:'dissolve',transition:storyChange?.24:.32,
+  opts.push({kind:'dissolve',transition:storyChange?.58:.52,
     score:(storyChange?.21:.14)+Math.min(.045,diff*.15)-(closeBeat?.055:0),
     reason:'Короткое кинематографическое растворение; планы мягко сменяются без перемещения экранных слоёв.'});
  }
  if(storyChange||(known&&diff>=.18)){
-  opts.push({kind:'dip',transition:storyChange?.34:.26,
+  opts.push({kind:'dip',transition:storyChange?.42:.34,
     score:(known&&diff>.22?.24:.13)-(closeBeat?.05:0),
     reason:'Смена места или композиции через краткое затемнение; избегает двоящихся контуров.'});
  }
