@@ -134,6 +134,7 @@ export function renderDirectorPlan(plan){
  plan.joins.map(j=>'<div class="hint" style="padding:8px;margin:6px 0;border:1px solid #36465e;border-radius:7px">'+
  '<b>Стык '+j.join+' → '+(j.join+1)+' · '+esc(names[j.kind]||j.kind)+'</b>'+
  '<div>'+esc(j.reason)+'</div>'+
+ '<button type="button" class="mini" style="margin:5px 0" data-one-join="'+(j.join-1)+'">▶ Посмотреть переход</button>'+
  (j.beat?'<small>Акцент: '+fmt(j.beat.time)+' с · расхождение '+fmt(j.beat.distance)+' с</small>':'')+
  (j.semanticSimilarity!==null?'<div><small>Смысловое сходство описаний кадров: '+j.semanticSimilarity.toFixed(2)+' (ориентир, не доказательство непрерывности)</small></div>':'')+
  '</div>').join('')+
