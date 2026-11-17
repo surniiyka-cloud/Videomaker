@@ -129,7 +129,14 @@ header .actions button,header .actions .drop{font-size:11px;padding:7px 9px!impo
 <div id="studioHint">Запуск: <code>py launch_studio.py</code> · затем открой http://127.0.0.1:8765. Версия GitHub Pages не умеет обращаться к локальному движку без моста.</div></section></details></aside>
 <main class="panel"><div class="toolbar" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">ПРОГРАММНЫЙ МОНИТОР</h2><span class="status" id="status">Ожидаю исходники</span></div><div class="stage" id="stage"><video id="v1" playsinline preload="auto" muted></video><video id="v2" playsinline preload="auto" muted style="opacity:0"></video><div class="placeholder" id="placeholder">Загрузи первые ролики и песню<br>Чтобы увидеть фильм на монтажной шкале</div></div><div class="playbar"><button id="play">▶ Воспроизвести</button><button id="stop">■</button><span class="time" id="time">00:00.00 / 00:00.00</span><label class="check"><input type="checkbox" id="mute"> Без музыки</label><label class="check">Громкость <input id="volume" type="range" min="0" max="1" step="0.05" value="0.8"></label></div><input id="seek" class="progress" type="range" min="0" max="1" step=".01" value="0"><audio id="audio" preload="auto"></audio><div class="info" style="margin-top:12px">🎞 <b>Проверка переходов:</b> выбери два соседних клипа. Для плавного перехода лучше совпадение направления движения, горизонта и масштаба. Автоматическое растворение сглаживает стык, но не создаёт физически непрерывный пролёт камеры.</div></main>
 <section class="panel full"><div class="toolbar" style="justify-content:space-between"><h2>ТАЙМЛАЙН <span class="badge">VIDEO 1 + AUDIO 1</span></h2><div class="toolbar"><span class="badge" id="totalLabel">0 клипов</span><button class="mini" id="fitMusic">Подогнать последний под песню</button></div></div><div class="timeline" id="timeline"><div class="ruler" id="ruler"></div><div class="track" id="track"></div><div class="musicTrack" id="musicTrack"><div class="wave"></div></div><div class="cursor" id="cursor"></div></div><div class="foot">Кликни по клипу на шкале, чтобы выбрать его. Для точной подгонки меняй обрезку и переходы в списке. Шкала перерисовывается автоматически.</div></section>
-<section class="panel full"><div class="split"><div><h2>СЦЕНЫ И ТОЧНАЯ ОБРЕЗКА</h2><div class="cliplist" id="clipList"><div class="muted hint">Здесь появятся добавленные клипы.</div></div></div><aside><h2>ИНСПЕКТОР СКЛЕЙКИ</h2><div class="frames"><div class="frame"><small>Последний кадр выбранного</small><img id="lastFrame" alt="Последний кадр"><button class="mini" id="downloadLast" disabled>↓ PNG</button></div><div class="frame"><small>Первый кадр следующего</small><img id="nextFrame" alt="Первый кадр"><button class="mini" id="downloadFirst" disabled>↓ PNG</button></div></div><p class="hint muted" id="frameHint">Выбери клип: здесь увидишь границу склейки.</p><div class="info">💡 Для Runway лучше готовить следующий стартовый референс на основе последнего кадра предыдущей анимации. Эти PNG можно прикреплять в чат для совместной режиссуры.</div><div class="toolbar" style="margin-top:12px"><button id="shotSheet" class="mini">↓ Лист перехода PNG</button></div><div class="info" id="smartSummary" style="margin-top:10px">Автоанализ ещё не проводился.</div><div id="zoomEditor" class="zoomEditor" style="margin-top:14px"></div></aside></div></section></div><div class="foot">Videomaker MVP · Обработка локально, видео не отправляются на сервер · Экспорт WebM идёт в реальном времени; для финального MP4/H.264 при необходимости перекодируй файл в редакторе.</div></div><div class="toast" id="toast"></div>
+<section class="panel full"><div class="split"><div><h2>СЦЕНЫ И ТОЧНАЯ ОБРЕЗКА</h2><div class="cliplist" id="clipList"><div class="muted hint">Здесь появятся добавленные клипы.</div></div></div><aside><h2>ИНСПЕКТОР СКЛЕЙКИ</h2><div class="frames"><div class="frame"><small>Последний кадр выбранного</small><img id="lastFrame" alt="Последний кадр"><button class="mini" id="downloadLast" disabled>↓ PNG</button></div><div class="frame"><small>Первый кадр следующего</small><img id="nextFrame" alt="Первый кадр"><button class="mini" id="downloadFirst" disabled>↓ PNG</button></div></div><p class="hint muted" id="frameHint">Выбери клип: здесь увидишь границу склейки.</p><div class="info">💡 Для Runway лучше готовить следующий стартовый референс на основе последнего кадра предыдущей анимации. Эти PNG можно прикреплять в чат для совместной режиссуры.</div><div class="toolbar" style="margin-top:12px"><button id="shotSheet" class="mini">↓ Лист перехода PNG</button></div><section id="aiDirectorPanel" style="margin:14px 0;padding:12px;background:#1a1d2b;border:1px solid #444062;border-radius:9px">
+<h2>AI DIRECTOR / TRANSFORMERS.JS</h2>
+<p class="hint muted">ИИ-модель CLIP анализирует начало и конец каждого клипа в браузере. Первый запуск скачивает модель; исходные видео не отправляются в GitHub.</p>
+<button class="primary" id="directorRun" type="button">✦ Анализировать сцены</button>
+<p class="hint muted" id="directorStatus" aria-live="polite">Ожидает запуска · экспериментальная функция</p>
+<div id="directorResults" style="display:grid;gap:7px;max-height:260px;overflow:auto"></div>
+</section>
+<div class="info" id="smartSummary" style="margin-top:10px">Автоанализ ещё не проводился.</div><div id="zoomEditor" class="zoomEditor" style="margin-top:14px"></div></aside></div></section></div><div class="foot">Videomaker MVP · Обработка локально, видео не отправляются на сервер · Экспорт WebM идёт в реальном времени; для финального MP4/H.264 при необходимости перекодируй файл в редакторе.</div></div><div class="toast" id="toast"></div>
 <script>
 'use strict';
 const $=x=>document.getElementById(x), clips=[], assets=[];let audioUrl=null, vmAudioFile=null, selected=0, playing=false, frameHandle=0, startWall=0, startTime=0, playhead=0, peaks=[], exporting=false;
@@ -402,5 +409,33 @@ $('montageRun').onclick=async()=>{
  }catch(e){montageNote('Ошибка: '+e.message)}finally{montageBusy=false;button.disabled=false}
 };
 if(['localhost','127.0.0.1'].includes(location.hostname))setTimeout(montageCheck,600);
+
+
+/* Optional browser ML module; existing editor remains functional if model fails. */
+document.getElementById('directorRun').addEventListener('click',async()=>{
+  const btn=document.getElementById('directorRun');
+  const status=document.getElementById('directorStatus');
+  const out=document.getElementById('directorResults');
+  if(!clips.length){status.textContent='Сначала загрузи хотя бы один видеоклип.';return}
+  if(!navigator.onLine){status.textContent='Для первого скачивания ИИ-модели требуется интернет.';return}
+  btn.disabled=true;out.innerHTML='';
+  try{
+    const module=await import('./ai_director.js');
+    const shots=[];
+    for(const clip of clips){
+      const a=aFor(clip);
+      if(!a)continue;
+      status.textContent='Подготавливаю кадры для '+a.file.name;
+      const first=await grabFrame(a.url,Math.max(0,clip.in+.08));
+      const last=await grabFrame(a.url,Math.max(0,clip.out-.08));
+      shots.push({label:clip.label||a.file.name,first,last});
+    }
+    const results=await module.analyzeShots(shots,t=>status.textContent=t);
+    out.innerHTML=module.presentShotAnalysis(results);
+    status.textContent='Готово: '+results.length+' сцен. Семантика — подсказка, не режиссёрский монтаж.';
+    window.vmDirectorResults=results;
+  }catch(err){status.textContent='Анализ не запустился: '+String(err?.message||err)}
+  finally{btn.disabled=false}
+});
 
 </script></body></html>
