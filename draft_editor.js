@@ -84,7 +84,7 @@ export function draftPanel(clips){
  '<div id="draftResult" aria-live="polite" class="hint"></div>';
 }
 export function draftSummary(result){
- const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&gt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  return '<p><b>Предложенный монтаж:</b> '+result.clips.length+' фрагментов · '+f(result.originalDuration)+' → '+f(result.newDuration)+' с</p>'+
  '<p>'+(!result.actions.length?'Обрезки не нужны: оставлен текущий порядок и длительности.':result.actions.map(esc).join('<br>'))+'</p>'+
  (result.warnings.length?'<p style="color:#f0b17e">'+result.warnings.map(esc).join('<br>')+'</p>':'')+
