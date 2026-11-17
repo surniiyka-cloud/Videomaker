@@ -118,7 +118,7 @@ header .actions button,header .actions .drop{font-size:11px;padding:7px 9px!impo
  .timeline{height:165px}
 }
 
-</style></head><body><div class="app"><header><div><div class="eyebrow">VIDEOMAKER / CREATIVE WORKSPACE · v4</div><h1>VIDEOMAKER <span>/</span> STUDIO</h1><small>Монтажная · исходники · музыка · AI-движок Montage</small></div><div class="actions"><span id="autosaveStatus" style="font-size:12px;color:#a8c5a8">◌ Восстановление…</span><button id="resetLocal" title="Удалить локально сохранённый проект">Очистить проект</button><button id="aiReport">↓ AI-отчёт по монтажу</button><button id="aiPackage" class="primary">↓ Пакет для ChatGPT ZIP</button><button id="save">↓ Проект JSON</button><label class="drop" style="padding:9px 12px;border-style:solid">↑ Открыть проект<input id="loadProject" type="file" accept=".json"></label><button class="primary" id="export">Экспорт WebM</button></div></header>
+</style></head><body><div class="app"><header><div><div class="eyebrow">VIDEOMAKER / CREATIVE WORKSPACE · v4</div><h1>VIDEOMAKER <span>/</span> STUDIO</h1><small>Монтажная · исходники · музыка · AI-движок Montage</small></div><div class="actions"><span id="autosaveStatus" style="font-size:12px;color:#a8c5a8">◌ Восстановление…</span><button id="clearVideos" title="Удалить только загруженные видео и клипы, оставив музыку">✕ Удалить все видео</button><button id="resetLocal" title="Удалить локально сохранённый проект">Очистить проект</button><button id="aiReport">↓ AI-отчёт по монтажу</button><button id="aiPackage" class="primary">↓ Пакет для ChatGPT ZIP</button><button id="save">↓ Проект JSON</button><label class="drop" style="padding:9px 12px;border-style:solid">↑ Открыть проект<input id="loadProject" type="file" accept=".json"></label><button class="primary" id="export">Экспорт WebM</button></div></header>
 <div class="layout"><aside class="panel"><h2>МЕДИАТЕКА <span class="badge">01</span></h2><label class="drop">＋ Добавить видео (MP4, WebM, MOV*)<input id="addVideos" type="file" multiple accept="video/*,.mov"></label><label class="drop" style="margin-top:8px">📁 Загрузить целую папку с видео и музыкой<input id="addFolder" type="file" webkitdirectory directory multiple></label><p class="hint muted">Файлы остаются в браузере. Выбирай клипы в порядке монтажа или меняй их ниже. *MOV зависит от поддержки браузера.</p><div id="assets" class="assets"></div><div style="margin-top:20px"><h2>АУДИО <span class="badge">02</span></h2><label class="drop">♫ Загрузить песню (WAV, MP3, M4A)<input id="addAudio" type="file" accept="audio/*"></label><p id="audioName" class="hint muted">Музыка не загружена</p><div class="toolbar"><button class="mini" id="auto">Авторасстановка</button><button class="mini" id="smartEdit">◈ Подобрать границы</button><button class="mini" id="undoSmart" disabled>↶ Отменить подгонку</button><button class="mini" id="beats">Найти акценты</button></div><p class="hint muted">Локальная подгонка помогает искать точки резкой склейки. Для полноценного автоматического монтажа используй движок Montage AI ниже.</p></div><details id="montageDisclosure"><summary>✦ Montage AI <span class="engine-hint">Дополнительный локальный движок · по желанию</span></summary><section id="montagePanel"><div class="tag">LOCAL ENGINE · WINDOWS</div><h2>✦ Montage AI</h2><p class="hint muted">Автомонтаж под музыку на компьютере. Требует запущенного Docker / Montage AI и локального моста Videomaker.</p>
 <div class="field"><label for="montageStyle">Режиссёрский стиль</label><select id="montageStyle"><option value="dynamic">Dynamic · развитие истории</option><option value="hitchcock">Cinematic · напряжение и раскрытие</option><option value="mtv">MTV · музыкальные удары</option><option value="action">Action · динамичные сцены</option><option value="minimalist">Minimal · спокойный монтаж</option></select></div>
 <div class="field"><label for="montagePrompt">Задача монтажёру</label><textarea id="montagePrompt">Кинематографичный музыкальный клип: сохранить смысловую последовательность событий и узнаваемость героя; избегать растворений с двоящимися зданиями и лицами; музыкальные акценты важнее случайных переходов.</textarea></div>
@@ -345,6 +345,35 @@ $('addAudio').addEventListener('change',async e=>{const f=e.target.files?.[0];if
 const vmOldDetectBeats=detectBeats;detectBeats=async function(){await vmOldDetectBeats();vmSchedule()};$('beats').onclick=detectBeats;
 const vmOldApplyProject=applyProject;applyProject=function(){vmOldApplyProject();vmSchedule()};
 $('mute').addEventListener('change',vmSchedule);$('volume').addEventListener('change',vmSchedule);
+$('clearVideos').onclick=async()=>{
+  if(!assets.length&&!clips.length){notice('Видеороликов в проекте уже нет.');return}
+  if(!confirm('Удалить все загруженные видео из Videomaker и очистить монтажную шкалу? Музыка останется, исходные файлы на компьютере не затронутся.'))return;
+  const btn=$('clearVideos');btn.disabled=true;
+  try{
+    stop();clearTimeout(vmSaveTimer);
+    const oldIds=assets.map(a=>a.id);
+    assets.forEach(a=>{try{URL.revokeObjectURL(a.url)}catch(e){}});
+    assets.splice(0,assets.length);clips.splice(0,clips.length);
+    selected=0;playhead=0;pendingProject=null;vmBeforeSmart=null;
+    $('undoSmart').disabled=true;
+    $('smartSummary').textContent='Видео удалены. Добавь новые исходники для анализа.';
+    $('directorResults').innerHTML='';
+    $('directorStatus').textContent='Ожидает запуска · экспериментальная функция';
+    ['v1','v2'].forEach(id=>{const v=$(id);v.pause();v.removeAttribute('src');delete v.dataset.id;v.load()});
+    $('addVideos').value='';$('addFolder').value='';
+    if(vmDb){
+      await new Promise((resolve,reject)=>{
+        const tx=vmDb.transaction(VM_STORE,'readwrite'),store=tx.objectStore(VM_STORE);
+        for(const id of oldIds)store.delete('asset:'+id);
+        store.put({version:1,assets:[],clips:[],audioName:$('audio').dataset.filename||null,selected:0,peaks,
+          muted:$('mute').checked,volume:+$('volume').value},'state');
+        tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||Error('Ошибка очистки'));
+      });
+    }
+    render();notice('Все видео и сцены удалены. Музыка сохранена. Можно загружать новые ролики.');
+  }catch(e){notice('Ошибка удаления: '+(e?.message||e))}
+  finally{btn.disabled=false}
+};
 $('resetLocal').onclick=async()=>{if(!confirm('Удалить локально сохранённые видео, музыку и монтаж из этого браузера? Это действие необратимо.'))return;stop();if(vmDb)vmDb.close();await new Promise((res,rej)=>{let r=indexedDB.deleteDatabase(VM_DB);r.onsuccess=res;r.onerror=()=>rej(r.error)});location.reload()};
 async function vmRestore(){try{vmDb=await vmOpen();const state=await vmGet('state');if(!state){vmRestoring=false;$('autosaveStatus').textContent='● Автосохранение включено';return}
 for(const meta of state.assets||[]){const file=await vmGet('asset:'+meta.id);if(!file)continue;const url=assetURL(file);const asset={id:meta.id,file,url,duration:meta.duration,first:null,last:null};assets.push(asset);Promise.allSettled([grabFrame(url,.05),grabFrame(url,meta.duration-.08)]).then(r=>{asset.first=r[0].status==='fulfilled'?r[0].value:null;asset.last=r[1].status==='fulfilled'?r[1].value:null;render()})}
