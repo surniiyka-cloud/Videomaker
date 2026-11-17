@@ -1,5 +1,5 @@
 // Experimental local semantic QA. Captions are imperfect: never treat them as ground truth.
-export const SEMANTIC_VERSION='0.3.0';
+export const SEMANTIC_VERSION='0.4.0';
 const MODEL='Xenova/vit-gpt2-image-captioning';
 let captionerPromise;
 const ignore=new Set(['the','a','an','is','are','in','on','of','to','and','with','at','as','it','there','this','that','image','picture','view','front','background','some','many','lot','standing','sitting','looking','large','small','man','person','people']);
@@ -56,18 +56,40 @@ export async function verifyContradictions({clip,asset,notes,capture,signature,d
   }
   const labels=desc.map(personLabel);
   const core=personLabel(desc[2]);
-  const neighbors=labels.filter((_,i)=>i!==2).filter(Boolean);
   const opposite=core==='man'?'woman':core==='woman'?'man':null;
-  const sameNear=neighbors.filter(x=>x===core).length;
-  const oppositeNear=neighbors.filter(x=>x===opposite).length;
   const incoming=distance(vectors[1],vectors[2]),outgoing=distance(vectors[2],vectors[3]);
   const returnDistance=distance(vectors[1],vectors[3]);
   const isolatedVisualJump=incoming>.12&&outgoing>.12&&returnDistance<Math.min(incoming,outgoing)*.75;
-  let conclusion='Модель не подтвердила устойчивое противоречие; возможна ошибка описания.';
-  if(core&&oppositeNear>=3)conclusion='Соседние кадры описаны иначе. Требуется проверка реального изображения.';
-  if(sameNear>=2)conclusion='Несколько соседних кадров описаны сходно, первоначальное противоречие неустойчиво.';
-  if(isolatedVisualJump)conclusion='Обнаружен локальный визуальный скачок. Это подозрительный момент, но не доказанная ошибка персонажа.';
-  checked.push({...note,followUp:{times,captions:desc,isolatedVisualJump,conclusion,autoRemove:false}});
+  // Find consecutive descriptions of the flagged subject; do not interpret
+  // classification words as ground truth about the character's appearance.
+  let first=2,last=2;
+  if(core==='man'||core==='woman'){
+   while(first>0&&labels[first-1]===core)first--;
+   while(last<labels.length-1&&labels[last+1]===core)last++;
+  }
+  const repeated=core!==null&&core!=='person'&&last>first;
+  const others=labels.filter((v,i)=>i<first||i>last);
+  const opposed=!!opposite&&others.some(v=>v===opposite);
+  const interval=repeated?{
+   start:+Math.max(clip.in,times[first]-(times[1]-times[0])*.3).toFixed(2),
+   end:+Math.min(clip.out,times[last]+(times[4]-times[3])*.3).toFixed(2)
+  }:null;
+  let conclusion='Одиночное противоречие в текстовом описании; визуальный дефект не подтверждён.';
+  let severity='низкая';
+  if(repeated&&opposed){
+   severity='повышенная';
+   conclusion='Подозрительное изменение описания повторяется на '+(last-first+1)+
+      ' соседних кадрах ('+times[first].toFixed(2)+'–'+times[last].toFixed(2)+
+      ' с). Это повод проверить изображение, но не доказательство смены персонажа.';
+  }else if(repeated){
+   conclusion='Соседние кадры описаны сходно; исходный единичный результат не выглядит изолированным.';
+  }
+  if(isolatedVisualJump){
+   severity='повышенная';
+   conclusion+=' Дополнительно обнаружен локальный скачок изображения.';
+  }
+  checked.push({...note,followUp:{times,captions:desc,isolatedVisualJump,
+    repeated,interval,severity,conclusion,autoRemove:false}});
  }
  return checked;
 }
@@ -120,6 +142,7 @@ export function renderStory(result){
   '<div class="hint">'+s.captions.map((c,i)=>(i+1)+'. '+esc(c)).join('<br>')+'</div>'+
   (s.contradictions?.length?'<div class="hint" style="color:#f5b37f">Перепроверенные противоречия: '+s.contradictions.map(a=>
     '<p>Кадр '+a.frame+' ('+a.time+' с): '+esc(a.reason)+'<br><b>Повторная проверка:</b> '+esc(a.followUp?.conclusion||'Не проводилась')+
+    (a.followUp?.interval?'<br><b>Подозрительный интервал:</b> '+a.followUp.interval.start+'–'+a.followUp.interval.end+' с':'')+
     '<br>'+a.followUp?.captions?.map((c,i)=>Number(a.followUp.times[i]).toFixed(2)+' с: '+esc(c)).join('<br>')+'</p>').join('')+'</div>':'')+
   (s.anomalies.length?'<p class="hint" style="color:#f5b37f">Подозрительные участки: '+s.anomalies.map(a=>a.start+'–'+a.end+' с').join(', ')+'</p>':'<p class="hint muted">Изолированных визуально-смысловых скачков по редким кадрам не найдено. Непроверенные дефекты возможны.</p>')+'</div>').join('')+
  '<h3 style="margin:12px 0 4px">Связность соседних сцен</h3>'+
