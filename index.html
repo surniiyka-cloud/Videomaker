@@ -249,36 +249,62 @@ async function sampleSignature(url,t){
 }
 function visualDistance(a,b){let sum=0;for(let i=0;i<a.length;i++){let k=i===a.length-1?.2:1;sum+=k*(a[i]-b[i])**2}return Math.sqrt(sum/(a.length*255*255))}
 let vmBeforeSmart=null;
+let vmSmartProposal=null;
 async function smartEdit(){
  if(clips.length<2){notice('Для анализа нужны хотя бы два ролика');return}
- vmBeforeSmart=clips.map(c=>({...c}));$('undoSmart').disabled=false;const button=$('smartEdit');button.disabled=true;
- const results=[];const cache=new Map();
+ const button=$('smartEdit');button.disabled=true;
+ const results=[],cache=new Map(),proposed=clips.map(c=>({...c}));
  try{
-  // Keep source ranges; optimize up to 1.4 seconds of boundary trimming per join.
-  const feature=async(a,t)=>{const key=a.id+':'+t.toFixed(2);if(!cache.has(key))cache.set(key,await sampleSignature(a.url,t));return cache.get(key)};
-  for(let i=0;i<clips.length-1;i++){
-   button.textContent=`Анализ стыка ${i+1}/${clips.length-1}…`;
-   const a=clips[i],b=clips[i+1],aa=aFor(a),bb=aFor(b);
-   const A=[0,.35,.7,1.05,1.4].filter(t=>a.out-t>a.in+.5);
-   const B=[0,.35,.7,1.05,1.4].filter(t=>b.in+t<b.out-.5);
-   let best=null;
-   for(const ta of A){const fa=await feature(aa,Math.max(a.in+.08,a.out-ta-.05));
-    for(const tb of B){const fb=await feature(bb,Math.min(b.out-.08,b.in+tb+.05));
+  const feature=async(a,t)=>{
+   const key=a.id+':'+t.toFixed(2);
+   if(!cache.has(key))cache.set(key,await sampleSignature(a.url,t));
+   return cache.get(key);
+  };
+  for(let i=0;i<proposed.length-1;i++){
+   button.textContent='Проверяю стык '+(i+1)+'/'+(proposed.length-1)+'…';
+   const left=proposed[i],right=proposed[i+1],aa=aFor(left),bb=aFor(right);
+   const endOptions=[0,.35,.7,1.05,1.4].filter(t=>left.out-t>left.in+.5);
+   const startOptions=[0,.35,.7,1.05,1.4].filter(t=>right.in+t<right.out-.5);
+   if(!endOptions.length||!startOptions.length)continue;
+   const currentA=await feature(aa,Math.max(left.in+.08,left.out-.05));
+   const currentB=await feature(bb,Math.min(right.out-.08,right.in+.05));
+   const baseline=visualDistance(currentA,currentB);
+   let best={ta:0,tb:0,score:baseline,d:baseline};
+   for(const ta of endOptions){
+    const fa=await feature(aa,Math.max(left.in+.08,left.out-ta-.05));
+    for(const tb of startOptions){
+     const fb=await feature(bb,Math.min(right.out-.08,right.in+tb+.05));
      const d=visualDistance(fa,fb),score=d+.022*(ta+tb);
-     if(!best||score<best.score)best={ta,tb,score,d};
+     if(score<best.score)best={ta,tb,score,d};
     }
    }
-   if(!best)continue;
-   a.out=Math.max(a.in+.2,a.out-best.ta);b.in=Math.min(b.out-.2,b.in+best.tb);
-   // Dissimilar images should not dissolve into ghosted buildings or faces.
-   a.kind='cut';a.transition=0; // Similar colors do not prove a continuous camera movement.
-   results.push({join:`${i+1} → ${i+2}`,distance:+best.d.toFixed(3),trimEnd:+best.ta.toFixed(2),trimStart:+best.tb.toFixed(2),transition:a.kind});
+   // Reject trims when visual similarity gain is too small to justify losing footage.
+   const improvement=Math.max(0,baseline-best.d);
+   const use=improvement>.025&&(best.ta+best.tb)>0;
+   if(use){left.out-=best.ta;right.in+=best.tb}
+   left.kind='cut';left.transition=0;
+   results.push({join:(i+1)+' → '+(i+2),before:baseline,after:best.d,ta:use?best.ta:0,tb:use?best.tb:0,accepted:use});
   }
-  window.vmSmartResults=results;
-  $('smartSummary').innerHTML='<b>Автоматический анализ:</b><div style="margin-top:6px">'+results.map(x=>`Стык ${x.join}: ${x.transition==='cut'?'резкая склейка':'короткое растворение'}, обрезка ${x.trimEnd} / ${x.trimStart} с, различие ${x.distance}`).join('<br>')+'</div><p class="hint muted">Сравнение цветов и композиции не определяет направление камеры, геометрию зданий или смысл песни. Проверь каждую склейку вручную.</p>';
-  stop();seek(0);render();notice(`Проверены ${results.length} стыков. Изменения применены; проверь предпросмотр.`);
- }catch(e){notice('Анализ не выполнен: '+e.message)}finally{button.disabled=false;button.textContent='◈ Подобрать границы'}
+  vmSmartProposal={clips:proposed,results};
+  $('smartSummary').innerHTML='<b>Предложения для монтажа — изменения ещё НЕ применены</b><div style="margin-top:7px">'+
+   results.map(r=>'Стык '+r.join+': '+(r.accepted?'укоротить конец на '+r.ta.toFixed(2)+' с, начало на '+r.tb.toFixed(2)+' с':'оставить без обрезки')+
+   '; жёсткая склейка').join('<br>')+'</div><p class="hint muted">Предварительная эвристика сравнивает композицию и тон, не понимает смысл песни и движение камеры. Перед применением оцени предложение.</p>'+
+   '<div class="toolbar"><button id="applySmartSuggestion" class="mini primary">Применить предложения</button><button id="dismissSmartSuggestion" class="mini">Отклонить</button></div>';
+  notice('Предложения готовы. Текущий монтаж пока не изменён.');
+ }catch(e){notice('Анализ не выполнен: '+e.message)}
+ finally{button.disabled=false;button.textContent='◈ Подобрать границы'}
 }
+$('smartSummary').addEventListener('click',e=>{
+ if(e.target.id==='dismissSmartSuggestion'){
+  vmSmartProposal=null;$('smartSummary').textContent='Предложения отклонены. Монтаж сохранён без изменений.';
+ }else if(e.target.id==='applySmartSuggestion'&&vmSmartProposal){
+  stop();vmBeforeSmart=clips.map(c=>({...c}));
+  clips.splice(0,clips.length,...vmSmartProposal.clips.map(c=>({...c})));
+  vmSmartProposal=null;$('undoSmart').disabled=false;
+  render();seek(0);$('smartSummary').textContent='Предложения применены. При необходимости используй «Отменить подгонку».';
+  notice('Подгонка применена. Проверь результат перед экспортом.');
+ }
+});
 function autoArrange(){if(!clips.length){notice('Добавь видеоролики');return}clips.forEach((c,i)=>{c.in=0;c.out=aFor(c).duration;c.kind=i===clips.length-1?'cut':'dissolve';c.transition=.5});seek(0);render();notice('Клипы расставлены последовательно. Проверь стыки и вручную подгони монтаж под вокал.')}
 function fitMusic(){const target=$('audio').duration||0;if(!target){notice('Загрузи песню');return}const {total}=layout();if(total<=target){notice('Видео короче песни на '+fmt(target-total)+'. Добавь сцены.');return}const c=clips[clips.length-1];if(dur(c)>total-target+.3){c.out-=total-target;render();notice('Последний клип подрезан до конца музыки.')}else notice('Превышение больше последнего клипа: укороти несколько сцен вручную.')}
 async function aiReport(){
