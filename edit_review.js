@@ -1,4 +1,4 @@
-export const REVIEW_VERSION = '1.3.0';
+export const REVIEW_VERSION = '1.4.0';
 // Videomaker: non-destructive editing review. No AI result is treated as certain.
 const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
 function absTime(t){return (Math.floor(t/60)).toString().padStart(2,'0')+':'+(t%60).toFixed(2).padStart(5,'0')}
@@ -22,7 +22,7 @@ function nearestBeat(beats,t){
  }
  return best;
 }
-export function reviewMontage({clips,peaks=[],motions=[],scenes=[],visuals=[]}){
+export function reviewMontage({clips,peaks=[],motions=[],scenes=[],visuals=[],jointMotions=[]}){
  if(!Array.isArray(clips)||clips.length<2)return [];
  let t=0;
  const times=[];
@@ -43,9 +43,14 @@ export function reviewMontage({clips,peaks=[],motions=[],scenes=[],visuals=[]}){
   const mismatch=reliableA&&reliableB&&!sameMovement;
   const semantic=matchSemantic(scenes[i],scenes[i+1]);
   const visual=visuals[i]||null;
+  const boundary=jointMotions[i]||null;
   const beat=nearestBeat(peaks,time);
   const nearbyBeat=beat&&beat.distance<=1.5?beat:null;
   const messages=[];
+  if(boundary?.assessed){
+    messages.push('Движение у склейки: конец 1-го клипа — '+boundary.left.direction+' ('+boundary.left.confidence+'), начало 2-го — '+boundary.right.direction+' ('+boundary.right.confidence+'). Вывод: '+boundary.verdict+'.');
+    messages.push('Направление относится к изображению на экране, а не к траектории камеры.');
+  }else if(boundary?.error){messages.push('Не удалось проверить движение у склейки: '+boundary.error)}
   if(visual?.assessed){messages.push('Сравнение двух пограничных кадров: '+visual.tonal+' (цвет '+visual.diff.color+', композиция '+visual.diff.composition+'). Это не доказывает совпадение движения камеры.');}
   else if(visual?.error){messages.push('Не удалось сравнить пограничные кадры: '+visual.error)}
   let risk='визуально не проверено';
@@ -63,8 +68,12 @@ export function reviewMontage({clips,peaks=[],motions=[],scenes=[],visuals=[]}){
     else messages.push('Ближайший найденный акцент: '+absTime(nearbyBeat.time)+' (расхождение '+nearbyBeat.distance.toFixed(2)+' с); сдвигать склейку без просмотра нельзя.');
   }else messages.push(peaks?.length?'В пределах 1,5 с от стыка убедительного найденного акцента нет. Не подгонять склейку вслепую.':'Музыкальные акценты ещё не найдены.');
   const rhythm=!peaks.length?'не анализировался':nearbyBeat?.distance<=.12?'рядом с акцентом (±0,12 с)':nearbyBeat?.distance<=.35?'близко к акценту (±0,35 с)':'точного акцента рядом нет';
-  if(visual?.assessed)risk='кадры сравнены; движение не проверено';
-  return {join:i+1,time:+time.toFixed(3),risk,rhythm,visual,beat:nearbyBeat&&{time:+nearbyBeat.time.toFixed(3),distance:+nearbyBeat.distance.toFixed(3)},messages,
+  if(visual?.assessed)risk='кадры сравнены; движение не подтверждено';
+  if(boundary?.assessed){
+    if(boundary.confidence==='средняя')risk=boundary.verdict;
+    else risk='движение измерено, уверенность низкая';
+  }
+  return {join:i+1,time:+time.toFixed(3),risk,rhythm,visual,boundary,beat:nearbyBeat&&{time:+nearbyBeat.time.toFixed(3),distance:+nearbyBeat.distance.toFixed(3)},messages,
     action:left.kind==='dissolve'?'Проверить, не заменить ли растворение жёсткой склейкой':'Оставить жёсткую склейку до визуальной проверки'};
  });
 }
