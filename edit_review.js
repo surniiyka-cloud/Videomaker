@@ -1,3 +1,4 @@
+export const REVIEW_VERSION = '1.2.0';
 // Videomaker: non-destructive editing review. No AI result is treated as certain.
 const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
 function absTime(t){return (Math.floor(t/60)).toString().padStart(2,'0')+':'+(t%60).toFixed(2).padStart(5,'0')}
