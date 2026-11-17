@@ -688,7 +688,7 @@ document.getElementById('directorOneClick').addEventListener('click',async()=>{
   vmBeatPreview=true;
   clips.splice(0,clips.length,...plan.clips.map(c=>({...c})));
   selected=Math.min(selected,clips.length-1);
-  render();seek(0);play();
+  render();seek(0);vmReviewPreviewEnd=layout().total;play();
   status.textContent='Черновой монтаж собран. Смотри видео и выбери «Принять» или «Вернуть оригинал».';
  }catch(err){
   // Never leave the timeline modified on an analysis failure.
@@ -701,7 +701,7 @@ document.getElementById('directorOneReport').addEventListener('click',event=>{
  const hit=event.target.closest('#oneDirectorAccept,#oneDirectorCancel,#oneDirectorReplay');
  if(!hit)return;
  if(hit.id==='oneDirectorReplay'){
-  if(!vmBeatPreview)return;stop();seek(0);play();return;
+  if(!vmBeatPreview)return;stop();seek(0);vmReviewPreviewEnd=layout().total;play();return;
  }
  if(hit.id==='oneDirectorCancel'){
   if(!vmBeatPreview)return;
