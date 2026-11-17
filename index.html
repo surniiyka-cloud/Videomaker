@@ -672,10 +672,11 @@ document.getElementById('draftContents').addEventListener('click',e=>{
     const id=Number(row.dataset.draftItem),
       exclude=row.querySelector('[data-draft-exclude]')?.checked||false,
       first=row.querySelector('[data-draft-start]')?.value||'',
-      last=row.querySelector('[data-draft-end]')?.value||'';
-    edits[id]={exclude,skipStart:first,skipEnd:last};
+      last=row.querySelector('[data-draft-end]')?.value||'',
+      style=row.querySelector('[data-draft-transition]')?.value||'keep';
+    edits[id]={exclude,skipStart:first,skipEnd:last,style};
   });
-  vmDraftPlan=vmDraftModule.buildDraft({clips,assets,peaks,edits});
+  vmDraftPlan=vmDraftModule.buildDraft({clips,assets,peaks,edits,review:window.vmEditReview||[]});
   const songDuration=$('audio').duration||0;
   let text=vmDraftModule.draftSummary(vmDraftPlan);
   if(songDuration>vmDraftPlan.newDuration+1)
