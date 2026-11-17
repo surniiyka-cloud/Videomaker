@@ -28,15 +28,15 @@ function nearbyBeat(peaks,t){
 const num=(n,fallback)=>Number.isFinite(n)?n:fallback;
 // One candidate means NO CHANGE to source duration; rhythm and visual continuity
 // are balanced over the whole edit instead of greedily optimizing individual ends.
-function optionsForJoin({visualDifference,beatDistance,hasMusic}){
+function optionsForJoin({visualDifference,beatDistance,hasMusic,semanticSimilarity}){
  const opts=[{kind:'cut',transition:0,score:0,reason:'Чистая склейка сохраняет действие и не создаёт двойных контуров.'}];
  const diff=num(visualDifference,0);
  if(diff>.12){
-  opts.push({kind:'dip',transition:.20,score:(diff-.12)*2.0-.025,
+  opts.push({kind:'dip',transition:.20,score:(diff-.12)*2.0-.025-(Number.isFinite(semanticSimilarity)&&semanticSimilarity<.12?.06:0),
     reason:'Короткое затемнение смягчает заметную смену изображения без наложения планов.'});
  }
  if(hasMusic&&beatDistance<=.075&&diff>.20){
-  opts.push({kind:'flash',transition:.12,score:(diff-.20)*.9-.045,
+  opts.push({kind:'flash',transition:.12,score:(diff-.20)*.9-.045-(Number.isFinite(semanticSimilarity)&&semanticSimilarity<.12?.035:0),
     reason:'Очень короткая вспышка попадает в музыкальный акцент; применять умеренно.'});
  }
  return opts;
@@ -61,7 +61,7 @@ export function planMontage({clips,assets=[],peaks=[],songDuration=0,signals=[]}
   const beat=nearbyBeat(peaks,cutAt);
   const beatDistance=beat?.distance??Infinity;
   const choices=optionsForJoin({visualDifference:sig.visualDifference,
-    beatDistance,hasMusic:songDuration>0&&peaks.length>0});
+    beatDistance,semanticSimilarity:sig.semanticSimilarity,hasMusic:songDuration>0&&peaks.length>0});
   const expanded=[];
   for(const prev of beam)for(const choice of choices){
    if(choice.kind!=='cut'&&(duration(c)<1||duration(next)<1))continue;
@@ -89,7 +89,8 @@ export function planMontage({clips,assets=[],peaks=[],songDuration=0,signals=[]}
   joins.push({join:i+1,time:+target.cutAt.toFixed(2),
    originalKind:clips[i].kind||'cut',kind:target.kind,transition:target.transition,
    reason:target.reason,beat:target.beat?{time:+target.beat.time.toFixed(2),distance:+target.beat.distance.toFixed(2)}:null,
-   visualDifference:target.visualDifference===null?null:+target.visualDifference.toFixed(3)});
+   visualDifference:target.visualDifference===null?null:+target.visualDifference.toFixed(3),
+   semanticSimilarity:Number.isFinite(signals[i]?.semanticSimilarity)?+signals[i].semanticSimilarity.toFixed(2):null});
  }
  // Terminal transition is not meaningful.
  const last=prepared[prepared.length-1];last.kind='cut';last.transition=0;
@@ -114,6 +115,7 @@ export function renderDirectorPlan(plan){
  '<b>Стык '+j.join+' → '+(j.join+1)+' · '+esc(names[j.kind]||j.kind)+'</b>'+
  '<div>'+esc(j.reason)+'</div>'+
  (j.beat?'<small>Акцент: '+fmt(j.beat.time)+' с · расхождение '+fmt(j.beat.distance)+' с</small>':'')+
+ (j.semanticSimilarity!==null?'<div><small>Смысловое сходство описаний кадров: '+j.semanticSimilarity.toFixed(2)+' (ориентир, не доказательство непрерывности)</small></div>':'')+
  '</div>').join('')+
  plan.warnings.map(w=>'<p class="hint" style="color:#efb783">'+esc(w)+'</p>').join('')+
  '<p class="hint muted">Это автоматическая композиция по доступным признакам. История, жесты и проблемные предметы не могут быть гарантированно распознаны браузерной моделью. Фрагменты не удалены.</p>';
