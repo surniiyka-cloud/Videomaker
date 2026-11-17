@@ -1,5 +1,5 @@
 // Browser-only draft timeline builder. Never deletes source files or rewrites footage.
-export const DRAFT_VERSION='0.3.0';
+export const DRAFT_VERSION='0.4.0';
 const f=x=>Number(x).toFixed(2);
 const clone=x=>({...x});
 const span=c=>Math.max(0,c.out-c.in);
@@ -23,6 +23,19 @@ function bestBeat(beats,time){
  }
  return chosen;
 }
+export function proposeSuspiciousTail(clip,contradictions){
+ const candidates=(contradictions||[]).filter(x=>
+  x?.followUp?.repeated&&x.followUp.severity==='повышенная'&&
+  x.followUp.interval&&x.followUp.autoRemove===false);
+ for(const c of candidates){
+  const interval=c.followUp.interval;
+  const tail=clip.out-interval.end,trimPoint=interval.start-.08,removed=clip.out-trimPoint;
+  if(tail>=0&&tail<=.7&&removed>=.20&&removed<=1.35&&trimPoint-clip.in>=.65)
+   return {trimEndTo:+trimPoint.toFixed(2),sourceInterval:interval,
+     reason:'Повторяющиеся противоречивые подписи у конца сцены; возможная безопасная альтернатива — ранняя склейка.'};
+ }
+ return null;
+}
 export function buildDraft({clips,assets,peaks=[],edits={},review=[]}){
  const media=new Map(assets.map(a=>[a.id,a]));
  const warnings=[],actions=[],draft=[];
@@ -43,6 +56,18 @@ export function buildDraft({clips,assets,peaks=[],edits={},review=[]}){
        c.kind=style;c.transition=style==='cut'?0:.3;
        actions.push('Сцена '+(i+1)+': переход '+(style==='dip'?'короткое затемнение':style==='flash'?'короткая вспышка':'жёсткая склейка'));
      }
+   }
+  }
+  if(Number.isFinite(e.trimEndTo)&&e.skipStart===undefined&&e.skipEnd===undefined){
+   const target=e.trimEndTo;
+   // For an end-of-scene anomaly, propose a shorter OUT. No pixel removal or
+   // identity claim; never leave less than 0.65 s of meaningful footage.
+   if(target>=c.in+.65&&target<c.out-.08){
+     const oldOut=c.out;
+     c.out=target;
+     c.kind='cut';c.transition=0;
+     actions.push('Предложение по сомнительному хвосту сцены '+(i+1)+': укоротить источник с '+f(oldOut)+' до '+f(target)+' с. ИИ не подтвердил дефект, поэтому требуется просмотр.');
+     warnings.push('Участок в конце сцены '+(i+1)+' помечен только по неустойчивым описаниям персонажа. Это не доказательство дефекта.');
    }
   }
   if(e.exclude){
