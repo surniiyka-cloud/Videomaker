@@ -101,8 +101,8 @@ def render(archive: Path, output: Path, width=1920, height=1080, fps=24, crf=18)
         for i in range(1, len(clips)):
             prev = clips[i-1]
             mode = prev.get('kind', 'cut')
-            effect = {'dissolve': 'fade', 'dip': 'fadeblack', 'flash': 'fadewhite'}.get(mode, 'fade')
-            transitional = mode in ('dissolve', 'dip', 'flash')
+            effect = {'dissolve': 'fade', 'dip': 'fadeblack', 'flash': 'fadewhite', 'wipe': 'smoothright'}.get(mode, 'fade')
+            transitional = mode in ('dissolve', 'dip', 'flash', 'wipe')
             overlap = (min(max(0, safe_number(prev.get('transition'), .3)),
                            durations[i-1]*.45, durations[i]*.45)
                        if transitional else 0.0)
