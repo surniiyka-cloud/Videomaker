@@ -31,12 +31,12 @@ const num=(n,fallback)=>Number.isFinite(n)?n:fallback;
 function optionsForJoin({visualDifference,beatDistance,hasMusic}){
  const opts=[{kind:'cut',transition:0,score:0,reason:'Чистая склейка сохраняет действие и не создаёт двойных контуров.'}];
  const diff=num(visualDifference,0);
- if(diff>.21){
-  opts.push({kind:'dip',transition:.20,score:(diff-.21)*2.0-.02,
+ if(diff>.12){
+  opts.push({kind:'dip',transition:.20,score:(diff-.12)*2.0-.025,
     reason:'Короткое затемнение смягчает заметную смену изображения без наложения планов.'});
  }
- if(hasMusic&&beatDistance<=.075&&diff>.27){
-  opts.push({kind:'flash',transition:.12,score:(diff-.27)*.75-.055,
+ if(hasMusic&&beatDistance<=.075&&diff>.20){
+  opts.push({kind:'flash',transition:.12,score:(diff-.20)*.9-.045,
     reason:'Очень короткая вспышка попадает в музыкальный акцент; применять умеренно.'});
  }
  return opts;
