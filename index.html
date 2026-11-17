@@ -230,7 +230,57 @@ function play(){if(playing){stop();return}if(!clips.length){notice('Сначал
 function downloadUrl(url,name){const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove()}
 function downloadData(data,name){if(data)downloadUrl(data,name)}
 function shotSheet(){const c=clips[selected],n=clips[selected+1];if(!c||!n){notice('Нужны два соседних клипа');return}const a=aFor(c),b=aFor(n);if(!a.last||!b.first){notice('Кадры ещё обрабатываются');return}const canvas=document.createElement('canvas');canvas.width=1920;canvas.height=610;const g=canvas.getContext('2d');g.fillStyle='#0b1423';g.fillRect(0,0,1920,610);let im1=new Image(),im2=new Image();im1.onload=()=>{im2.onload=()=>{g.drawImage(im1,0,0,945,532);g.drawImage(im2,975,0,945,532);g.fillStyle='white';g.font='28px system-ui';g.fillText('END — '+c.label.slice(0,30),16,572);g.fillText('START — '+n.label.slice(0,30),992,572);downloadData(canvas.toDataURL('image/png'),`transition_${selected+1}_${selected+2}.png`)};im2.src=b.first};im1.src=a.last}
-async function detectBeats(){if(!audioUrl){notice('Сначала загрузи аудио');return}notice('Анализирую звуковые акценты…');try{const buf=await (await fetch(audioUrl)).arrayBuffer();const ctx=new (window.AudioContext||window.webkitAudioContext)();const a=await ctx.decodeAudioData(buf);const sr=a.sampleRate,ch=a.getChannelData(0),win=2048,step=1024,rms=[];for(let i=0;i<ch.length-win;i+=step){let q=0;for(let j=0;j<win;j+=4)q+=ch[i+j]*ch[i+j];rms.push(Math.sqrt(q/(win/4)))}let candidates=[];for(let i=3;i<rms.length-3;i++){let prev=(rms[i-1]+rms[i-2]+rms[i-3])/3;let novelty=rms[i]-prev;if(novelty>.025&&rms[i]>rms[i-1]&&rms[i]>=rms[i+1])candidates.push({t:i*step/sr,v:novelty})}candidates.sort((a,b)=>b.v-a.v);peaks=[];for(const e of candidates){if(peaks.every(t=>Math.abs(t-e.t)>.42))peaks.push(e.t);if(peaks.length>=180)break}peaks.sort((a,b)=>a-b);await ctx.close();renderTimeline();notice('Найдено '+peaks.length+' возможных звуковых акцентов. Это подсказки, не точные такты.')}catch(e){notice('Ошибка анализа аудио: '+e.message)}}
+async function detectBeats(){
+ if(!audioUrl){notice('Сначала загрузи аудио');return}
+ notice('Анализирую ритмические акценты по всей песне…');
+ let ctx=null;
+ try{
+  const buf=await (await fetch(audioUrl)).arrayBuffer();
+  ctx=new (window.AudioContext||window.webkitAudioContext)();
+  const a=await ctx.decodeAudioData(buf),sr=a.sampleRate,win=2048,step=1024;
+  const channel=a.getChannelData(0),channel2=a.numberOfChannels>1?a.getChannelData(1):null;
+  const energy=[];
+  for(let i=0;i+win<channel.length;i+=step){
+   let sum=0;
+   for(let j=0;j<win;j+=8){
+    let sample=channel[i+j];
+    if(channel2)sample=(sample+channel2[i+j])*.5;
+    sum+=sample*sample;
+   }
+   energy.push(Math.sqrt(sum/(win/8)));
+  }
+  // Local adaptive threshold keeps accents from quiet sections too.
+  // The old global top-180 filter could leave many seconds without any beats.
+  const rate=sr/step,radius=Math.max(6,Math.round(rate*.8));
+  const prefix=[0];
+  for(const e of energy)prefix.push(prefix[prefix.length-1]+e);
+  const novelty=new Float32Array(energy.length);
+  for(let i=3;i<energy.length-2;i++){
+   const base=(energy[i-1]+energy[i-2]+energy[i-3])/3;
+   novelty[i]=Math.max(0,energy[i]-base);
+  }
+  const sums=[0];
+  for(const n of novelty)sums.push(sums[sums.length-1]+n);
+  const found=[];
+  for(let i=3;i<energy.length-3;i++){
+   const lo=Math.max(0,i-radius),hi=Math.min(energy.length,i+radius+1);
+   const avg=(sums[hi]-sums[lo])/(hi-lo);
+   const value=novelty[i],loudness=(prefix[hi]-prefix[lo])/(hi-lo);
+   if(value>Math.max(.006,avg*1.6)&&
+      energy[i]>Math.max(.008,loudness*.42)&&
+      value>=novelty[i-1]&&value>novelty[i+1]){
+       const t=i/rate;
+       const last=found[found.length-1];
+       if(last&&t-last.t<.22){if(value>last.v){last.t=t;last.v=value}}
+       else found.push({t,v:value});
+   }
+  }
+  peaks=found.map(x=>x.t);
+  renderTimeline();vmSchedule();
+  notice('Найдено '+peaks.length+' возможных акцентов по всей песне; это не гарантированные доли такта.');
+ }catch(e){notice('Ошибка анализа аудио: '+e.message)}
+ finally{if(ctx)try{await ctx.close()}catch(e){}}
+}
 // Simple on-device visual boundary analysis. No cloud AI or semantic scene recognition.
 async function sampleSignature(url,t){
  const data=await grabFrame(url,t);
