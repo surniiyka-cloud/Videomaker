@@ -118,15 +118,13 @@ header .actions button,header .actions .drop{font-size:11px;padding:7px 9px!impo
  .timeline{height:165px}
 }
 
-</style></head><body><div class="app"><header><div><div class="eyebrow">VIDEOMAKER / CREATIVE WORKSPACE · v4</div><h1>VIDEOMAKER <span>/</span> STUDIO</h1><small>Монтажная · исходники · музыка · AI-движок Montage</small></div><div class="actions"><span id="autosaveStatus" style="font-size:12px;color:#a8c5a8">◌ Восстановление…</span><button id="clearVideos" title="Удалить только загруженные видео и клипы, оставив музыку">✕ Удалить все видео</button><button id="resetLocal" title="Удалить локально сохранённый проект">Очистить проект</button><button id="aiReport">↓ AI-отчёт по монтажу</button><button id="aiPackage" class="primary">↓ Пакет для ChatGPT ZIP</button><button id="save">↓ Проект JSON</button><label class="drop" style="padding:9px 12px;border-style:solid">↑ Открыть проект<input id="loadProject" type="file" accept=".json"></label><button class="primary" id="export">Экспорт WebM</button></div></header>
-<div class="layout"><aside class="panel"><h2>МЕДИАТЕКА <span class="badge">01</span></h2><label class="drop">＋ Добавить видео (MP4, WebM, MOV*)<input id="addVideos" type="file" multiple accept="video/*,.mov"></label><label class="drop" style="margin-top:8px">📁 Загрузить целую папку с видео и музыкой<input id="addFolder" type="file" webkitdirectory directory multiple></label><p class="hint muted">Файлы остаются в браузере. Выбирай клипы в порядке монтажа или меняй их ниже. *MOV зависит от поддержки браузера.</p><div id="assets" class="assets"></div><div style="margin-top:20px"><h2>АУДИО <span class="badge">02</span></h2><label class="drop">♫ Загрузить песню (WAV, MP3, M4A)<input id="addAudio" type="file" accept="audio/*"></label><p id="audioName" class="hint muted">Музыка не загружена</p><div class="toolbar"><button class="mini" id="auto">Авторасстановка</button><button class="mini" id="smartEdit">◈ Подобрать границы</button><button class="mini" id="undoSmart" disabled>↶ Отменить подгонку</button><button class="mini" id="beats">Найти акценты</button></div><p class="hint muted">Локальная подгонка помогает искать точки резкой склейки. Для полноценного автоматического монтажа используй движок Montage AI ниже.</p></div><details id="montageDisclosure"><summary>✦ Montage AI <span class="engine-hint">Дополнительный локальный движок · по желанию</span></summary><section id="montagePanel"><div class="tag">LOCAL ENGINE · WINDOWS</div><h2>✦ Montage AI</h2><p class="hint muted">Автомонтаж под музыку на компьютере. Требует запущенного Docker / Montage AI и локального моста Videomaker.</p>
-<div class="field"><label for="montageStyle">Режиссёрский стиль</label><select id="montageStyle"><option value="dynamic">Dynamic · развитие истории</option><option value="hitchcock">Cinematic · напряжение и раскрытие</option><option value="mtv">MTV · музыкальные удары</option><option value="action">Action · динамичные сцены</option><option value="minimalist">Minimal · спокойный монтаж</option></select></div>
-<div class="field"><label for="montagePrompt">Задача монтажёру</label><textarea id="montagePrompt">Кинематографичный музыкальный клип: сохранить смысловую последовательность событий и узнаваемость героя; избегать растворений с двоящимися зданиями и лицами; музыкальные акценты важнее случайных переходов.</textarea></div>
-<label class="check"><input id="montageTimeline" type="checkbox" checked> Экспорт монтажной шкалы</label>
-<div id="montageProgress"><div id="montageBar"></div></div><div id="montageStatus">Движок не проверен</div>
-<button id="montageCheck">Проверить подключение</button><button class="primary" id="montageRun">✦ Создать монтаж через Montage AI</button>
-<a id="montageLink" download="montage-result.mp4">↓ Скачать результат MP4</a>
-<div id="studioHint">Запуск: <code>py launch_studio.py</code> · затем открой http://127.0.0.1:8765. Версия GitHub Pages не умеет обращаться к локальному движку без моста.</div></section></details></aside>
+
+/* Browser-first color controls and simplified editing studio */
+#zoomEditor label.check{display:grid;grid-template-columns:120px minmax(60px,1fr) 50px;gap:8px;margin:10px 0;align-items:center}
+#zoomEditor label.check input[type=range]{width:100%!important;min-width:0}
+#gradeStatus{margin-top:9px}
+</style></head><body><div class="app"><header><div><div class="eyebrow">VIDEOMAKER / CREATIVE WORKSPACE · v4</div><h1>VIDEOMAKER <span>/</span> STUDIO</h1><small>Монтажная · исходники · музыка · AI Director</small></div><div class="actions"><span id="autosaveStatus" style="font-size:12px;color:#a8c5a8">◌ Восстановление…</span><button id="clearVideos" title="Удалить только загруженные видео и клипы, оставив музыку">✕ Удалить все видео</button><button id="resetLocal" title="Удалить локально сохранённый проект">Очистить проект</button><button id="aiReport">↓ AI-отчёт по монтажу</button><button id="aiPackage" class="primary">↓ Пакет для ChatGPT ZIP</button><button id="save">↓ Проект JSON</button><label class="drop" style="padding:9px 12px;border-style:solid">↑ Открыть проект<input id="loadProject" type="file" accept=".json"></label><button class="primary" id="export">Экспорт WebM</button></div></header>
+<div class="layout"><aside class="panel"><h2>МЕДИАТЕКА <span class="badge">01</span></h2><label class="drop">＋ Добавить видео (MP4, WebM, MOV*)<input id="addVideos" type="file" multiple accept="video/*,.mov"></label><label class="drop" style="margin-top:8px">📁 Загрузить целую папку с видео и музыкой<input id="addFolder" type="file" webkitdirectory directory multiple></label><p class="hint muted">Файлы остаются в браузере. Выбирай клипы в порядке монтажа или меняй их ниже. *MOV зависит от поддержки браузера.</p><div id="assets" class="assets"></div><div style="margin-top:20px"><h2>АУДИО <span class="badge">02</span></h2><label class="drop">♫ Загрузить песню (WAV, MP3, M4A)<input id="addAudio" type="file" accept="audio/*"></label><p id="audioName" class="hint muted">Музыка не загружена</p><div class="toolbar"><button class="mini" id="auto">Авторасстановка</button><button class="mini" id="smartEdit">◈ Подобрать границы</button><button class="mini" id="undoSmart" disabled>↶ Отменить подгонку</button><button class="mini" id="beats">Найти акценты</button></div><p class="hint muted">Локальная подгонка помогает искать точки резкой склейки. Для полноценного автоматического монтажа используй движок Montage AI ниже.</p></div></aside>
 <main class="panel"><div class="toolbar" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">ПРОГРАММНЫЙ МОНИТОР</h2><span class="status" id="status">Ожидаю исходники</span></div><div class="stage" id="stage"><video id="v1" playsinline preload="auto" muted></video><video id="v2" playsinline preload="auto" muted style="opacity:0"></video><div class="placeholder" id="placeholder">Загрузи первые ролики и песню<br>Чтобы увидеть фильм на монтажной шкале</div></div><div class="playbar"><button id="play">▶ Воспроизвести</button><button id="stop">■</button><span class="time" id="time">00:00.00 / 00:00.00</span><label class="check"><input type="checkbox" id="mute"> Без музыки</label><label class="check">Громкость <input id="volume" type="range" min="0" max="1" step="0.05" value="0.8"></label></div><input id="seek" class="progress" type="range" min="0" max="1" step=".01" value="0"><audio id="audio" preload="auto"></audio><div class="info" style="margin-top:12px">🎞 <b>Проверка переходов:</b> выбери два соседних клипа. Для плавного перехода лучше совпадение направления движения, горизонта и масштаба. Автоматическое растворение сглаживает стык, но не создаёт физически непрерывный пролёт камеры.</div></main>
 <section class="panel full"><div class="toolbar" style="justify-content:space-between"><h2>ТАЙМЛАЙН <span class="badge">VIDEO 1 + AUDIO 1</span></h2><div class="toolbar"><span class="badge" id="totalLabel">0 клипов</span><button class="mini" id="fitMusic">Подогнать последний под песню</button></div></div><div class="timeline" id="timeline"><div class="ruler" id="ruler"></div><div class="track" id="track"></div><div class="musicTrack" id="musicTrack"><div class="wave"></div></div><div class="cursor" id="cursor"></div></div><div class="foot">Кликни по клипу на шкале, чтобы выбрать его. Для точной подгонки меняй обрезку и переходы в списке. Шкала перерисовывается автоматически.</div></section>
 <section class="panel full"><div class="split"><div><h2>СЦЕНЫ И ТОЧНАЯ ОБРЕЗКА</h2><div class="cliplist" id="clipList"><div class="muted hint">Здесь появятся добавленные клипы.</div></div></div><aside><h2>ИНСПЕКТОР СКЛЕЙКИ</h2><div class="frames"><div class="frame"><small>Последний кадр выбранного</small><img id="lastFrame" alt="Последний кадр"><button class="mini" id="downloadLast" disabled>↓ PNG</button></div><div class="frame"><small>Первый кадр следующего</small><img id="nextFrame" alt="Первый кадр"><button class="mini" id="downloadFirst" disabled>↓ PNG</button></div></div><p class="hint muted" id="frameHint">Выбери клип: здесь увидишь границу склейки.</p><div class="info">💡 Для Runway лучше готовить следующий стартовый референс на основе последнего кадра предыдущей анимации. Эти PNG можно прикреплять в чат для совместной режиссуры.</div><div class="toolbar" style="margin-top:12px"><button id="shotSheet" class="mini">↓ Лист перехода PNG</button></div><section id="aiDirectorPanel" style="margin:14px 0;padding:12px;background:#1a1d2b;border:1px solid #444062;border-radius:9px">
@@ -161,13 +159,67 @@ function renderZoomEditor(){
  <p class="hint muted">Масштаб плавно увеличивается к последнему кадру; точка фокуса — слева/справа/центр. Подходит для скрытия склейки за близким фасадом. Сильный зум снижает резкость.</p>
  <label class="check">Конечный масштаб <input style="width:100%" data-zoom="zoomEnd" type="range" min="1" max="4" step="0.1" value="${c.zoomEnd||1}"> <b>${(c.zoomEnd||1).toFixed(1)}×</b></label>
  <label class="check">Точка фокуса <select data-zoom="zoomAnchor"><option value="15" ${+c.zoomAnchor===15?'selected':''}>Слева</option><option value="50" ${!c.zoomAnchor||+c.zoomAnchor===50?'selected':''}>Центр</option><option value="85" ${+c.zoomAnchor===85?'selected':''}>Справа</option></select></label>
- <label class="check">Длительность приближения <select data-zoom="zoomSeconds">${[.4,.8,1,1.5,2].map(x=>`<option value="${x}" ${+(c.zoomSeconds||1)===x?'selected':''}>${x} с</option>`).join('')}</select></label>`;
+ <label class="check">Длительность приближения <select data-zoom="zoomSeconds">${[.4,.8,1,1.5,2].map(x=>`<option value="${x}" ${+(c.zoomSeconds||1)===x?'selected':''}>${x} с</option>`).join('')}</select></label>
+ <h2 style="margin-top:18px">08 / Цветокоррекция клипа</h2>
+ <p class="hint muted">Яркость, контраст, насыщенность и теплота. Параметры применяются к предпросмотру и WebM.</p>
+ <label class="check">Яркость <input style="width:100%" data-zoom="gradeBrightness" type="range" min="0.75" max="1.25" step="0.01" value="${c.gradeBrightness??1}"> <b>${Math.round((c.gradeBrightness??1)*100)}%</b></label>
+ <label class="check">Контраст <input style="width:100%" data-zoom="gradeContrast" type="range" min="0.75" max="1.25" step="0.01" value="${c.gradeContrast??1}"> <b>${Math.round((c.gradeContrast??1)*100)}%</b></label>
+ <label class="check">Насыщенность <input style="width:100%" data-zoom="gradeSaturation" type="range" min="0.5" max="1.5" step="0.01" value="${c.gradeSaturation??1}"> <b>${Math.round((c.gradeSaturation??1)*100)}%</b></label>
+ <label class="check">Теплота <input style="width:100%" data-zoom="gradeWarmth" type="range" min="0" max="0.35" step="0.01" value="${c.gradeWarmth??0}"> <b>${Math.round((c.gradeWarmth??0)*100)}%</b></label>
+ <div class="toolbar" style="margin-top:9px"><button class="mini" id="gradeReset" type="button">Сбросить цвет</button><button class="mini primary" id="gradeAuto" type="button">✦ Согласовать цвет клипов</button><button class="mini" id="gradeUndo" type="button" disabled>↶ Отменить цвет</button></div>
+ <p class="hint muted" id="gradeStatus">Автоматическое согласование сравнивает яркость и контраст кадров, но не заменяет профессиональную покадровую цветокоррекцию.</p>`;
 }
 function zoomFor(c,sourceTime){if(!c||!(c.zoomEnd>1))return 1;const start=c.out-Math.min(c.zoomSeconds||1,dur(c));const pct=Math.max(0,Math.min(1,(sourceTime-start)/Math.max(.08,c.out-start)));return 1+(c.zoomEnd-1)*(pct*pct*(3-2*pct))}
+
+function gradeFilter(c){
+ const clamp=(v,lo,hi,d)=>Math.min(hi,Math.max(lo,Number.isFinite(+v)?+v:d));
+ return 'brightness('+clamp(c?.gradeBrightness,.75,1.25,1)+') contrast('+clamp(c?.gradeContrast,.75,1.25,1)+') saturate('+clamp(c?.gradeSaturation,.5,1.5,1)+') sepia('+clamp(c?.gradeWarmth,0,.35,0)+')';
+}
+let vmBeforeGrade=null;
+function resetGrade(c){c.gradeBrightness=1;c.gradeContrast=1;c.gradeSaturation=1;c.gradeWarmth=0}
+function gradeStats(src){
+ return new Promise((resolve,reject)=>{
+  const im=new Image();
+  im.onload=()=>{
+   const cv=document.createElement('canvas');cv.width=64;cv.height=36;
+   const ctx=cv.getContext('2d',{willReadFrequently:true});ctx.drawImage(im,0,0,64,36);
+   const data=ctx.getImageData(0,0,64,36).data;let sum=0,sumSq=0,n=0;
+   for(let i=0;i<data.length;i+=16){const y=.2126*data[i]+.7152*data[i+1]+.0722*data[i+2];sum+=y;sumSq+=y*y;n++}
+   const mean=sum/n;resolve({mean,sd:Math.sqrt(Math.max(0,sumSq/n-mean*mean))});
+  };im.onerror=reject;im.src=src;
+ });
+}
+async function autoGrade(){
+ if(!clips.length){notice('Добавь видео');return}
+ const btn=$('gradeAuto');if(!btn)return;
+ btn.disabled=true;vmBeforeGrade=clips.map(c=>({...c}));
+ const status=$('gradeStatus');if(status)status.textContent='Анализирую средние тона кадров…';
+ try{
+  const st=[];
+  for(let i=0;i<clips.length;i++){
+   const c=clips[i],a=aFor(c);
+   const frame=await grabFrame(a.url,c.in+dur(c)*.5);
+   st.push(await gradeStats(frame));
+  }
+  // The reference is the median, not the brightest shot or a single outlier.
+  const median=ar=>[...ar].sort((a,b)=>a-b)[Math.floor(ar.length/2)];
+  const targetL=median(st.map(x=>x.mean)),targetD=median(st.map(x=>x.sd));
+  for(let i=0;i<clips.length;i++){
+   const c=clips[i],v=st[i];
+   c.gradeBrightness=Math.min(1.15,Math.max(.85,targetL/Math.max(v.mean,35)));
+   c.gradeContrast=Math.min(1.15,Math.max(.85,targetD/Math.max(v.sd,20)));
+   c.gradeSaturation=1;c.gradeWarmth=0;
+  }
+  render();loadPreview(playhead);
+  if($('gradeStatus'))$('gradeStatus').textContent='Подобраны общие яркость и контраст по средним кадрам. Проверь кадры перед экспортом.';
+  notice('Цвет согласован приблизительно. Можно отменить и настроить вручную.');
+ }catch(e){clips.forEach((c,i)=>Object.assign(c,vmBeforeGrade[i]));render();notice('Автоцвет не выполнен: '+e.message)}
+ finally{btn.disabled=false;const u=$('gradeUndo');if(u)u.disabled=false}
+}
 function renderFrames(){const c=clips[selected],n=clips[selected+1],a=c&&aFor(c),b=n&&aFor(n);$('lastFrame').src=a?.last||'';$('nextFrame').src=b?.first||'';$('downloadLast').disabled=!a?.last;$('downloadFirst').disabled=!b?.first;$('frameHint').textContent=c?(n?`Стык ${selected+1} → ${selected+2}. Исходящий клип: ${c.label}. Следующий: ${n.label}.`:'Последний клип проекта; справа пока нет следующего кадра.'):'Выбери клип для проверки стыка.'}
 function select(i){selected=Math.min(clips.length-1,Math.max(0,i));render();const l=layout();seek(l.starts[selected]||0)}
 function activeAt(t){const {starts}=layout();const idx=clips.findIndex((c,i)=>t>=starts[i]&&t<starts[i]+dur(c));if(idx<0)return [];const result=[{i:idx,alpha:1,time:clips[idx].in+t-starts[idx]}];if(idx+1<clips.length){const ov=overlap(clips[idx],clips[idx+1]);if(t>=starts[idx+1]&&ov>0){result[0].alpha=1-(t-starts[idx+1])/ov;result.push({i:idx+1,alpha:1-result[0].alpha,time:clips[idx+1].in+t-starts[idx+1]})}}return result}
-function loadPreview(t){const act=activeAt(t),videos=[$('v1'),$('v2')];$('placeholder').style.display=act.length?'none':'grid';act.forEach((entry,j)=>{const v=videos[j],a=aFor(clips[entry.i]);if(v.dataset.id!==a.id){v.src=a.url;v.dataset.id=a.id}if(Math.abs((v.currentTime||0)-entry.time)>.22&&v.readyState>=1)try{v.currentTime=entry.time}catch(e){}v.style.opacity=entry.alpha;v.style.zIndex=j+1;v.style.transformOrigin=`${clips[entry.i].zoomAnchor||50}% 50%`;v.style.transform=`scale(${zoomFor(clips[entry.i],entry.time)})`;});for(let j=act.length;j<2;j++){videos[j].style.opacity=0;videos[j].style.transform='none';videos[j].pause()}}
+function loadPreview(t){const act=activeAt(t),videos=[$('v1'),$('v2')];$('placeholder').style.display=act.length?'none':'grid';act.forEach((entry,j)=>{const v=videos[j],a=aFor(clips[entry.i]);if(v.dataset.id!==a.id){v.src=a.url;v.dataset.id=a.id}if(Math.abs((v.currentTime||0)-entry.time)>.22&&v.readyState>=1)try{v.currentTime=entry.time}catch(e){}v.style.opacity=entry.alpha;v.style.zIndex=j+1;v.style.filter=gradeFilter(clips[entry.i]);v.style.transformOrigin=`${clips[entry.i].zoomAnchor||50}% 50%`;v.style.transform=`scale(${zoomFor(clips[entry.i],entry.time)})`;});for(let j=act.length;j<2;j++){videos[j].style.opacity=0;videos[j].style.transform='none';videos[j].style.filter='none';videos[j].pause()}}
 function seek(t){playhead=Math.max(0,Math.min(t,duration()));loadPreview(playhead);renderTimeline();if(audioUrl&&$('audio').readyState>=1){$('audio').currentTime=Math.min(playhead,$('audio').duration||0)}}
 function stop(){playing=false;cancelAnimationFrame(frameHandle);$('play').textContent='▶ Воспроизвести';$('audio').pause();[$('v1'),$('v2')].forEach(x=>x.pause());}
 function tick(){if(!playing)return;playhead=startTime+(performance.now()-startWall)/1000;if(playhead>=duration()){seek(0);stop();return}loadPreview(playhead);for(let v of [$('v1'),$('v2')]){if(+v.style.opacity>0&&v.paused)v.play().catch(()=>{});else if(+v.style.opacity===0&&!v.paused)v.pause()}renderTimeline();frameHandle=requestAnimationFrame(tick)}
@@ -274,7 +326,7 @@ let pendingProject=null;async function loadProject(file){try{const p=JSON.parse(
 function applyProject(){if(!pendingProject)return;const p=pendingProject;if(!p.clips.every(c=>assets.some(a=>a.file.name===c.file))){return}clips.splice(0,clips.length,...p.clips.map(c=>({...c,assetId:assets.find(a=>a.file.name===c.file).id})));peaks=p.peaks||[];selected=0;seek(0);render();pendingProject=null}
 async function exportVideo(){if(exporting)return;if(!clips.length){notice('Сначала добавь клипы');return}if(!window.MediaRecorder){notice('Этот браузер не поддерживает MediaRecorder');return}const total=layout().total,canvas=document.createElement('canvas');canvas.width=1280;canvas.height=720;const g=canvas.getContext('2d'),stream=canvas.captureStream(24);let ctx,source,dest,exportAudio=null;try{if(audioUrl&&!$('mute').checked){ctx=new AudioContext();dest=ctx.createMediaStreamDestination();exportAudio=new Audio();exportAudio.src=audioUrl;source=ctx.createMediaElementSource(exportAudio);source.connect(dest);stream.addTrack(dest.stream.getAudioTracks()[0])}const mime=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(x=>MediaRecorder.isTypeSupported(x));if(!mime)throw Error('WebM недоступен');const recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:6500000});const chunks=[];recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};recorder.onstop=()=>{downloadUrl(URL.createObjectURL(new Blob(chunks,{type:mime})),'videomaker-export.webm');exporting=false;$('export').disabled=false;$('export').textContent='Экспорт WebM';if(ctx)ctx.close();};exporting=true;stop();$('export').disabled=true;recorder.start(500);const vids=[document.createElement('video'),document.createElement('video')];vids.forEach(v=>{v.muted=true;v.playsInline=true;v.preload='auto'});let oldIds=['',''],wall=performance.now();if(exportAudio){exportAudio.volume=1;await ctx.resume();exportAudio.play().catch(()=>{})}const draw=()=>{const t=(performance.now()-wall)/1000;if(t>=total){recorder.stop();vids.forEach(v=>v.pause());exportAudio?.pause();notice('Запись завершена, готовлю файл.');return}const entries=activeAt(t);g.fillStyle='black';g.fillRect(0,0,1280,720);for(let j=0;j<entries.length;j++){let e=entries[j],v=vids[j],a=aFor(clips[e.i]);if(oldIds[j]!==a.id){v.src=a.url;oldIds[j]=a.id;v.load()}if(v.readyState>=1&&Math.abs(v.currentTime-e.time)>.2)v.currentTime=e.time;if(v.paused)v.play().catch(()=>{});if(v.readyState>=2){g.globalAlpha=Math.max(0,Math.min(1,e.alpha));let scale=Math.min(1280/v.videoWidth,720/v.videoHeight),w=v.videoWidth*scale,h=v.videoHeight*scale;const z=zoomFor(clips[e.i],e.time);const ax=(clips[e.i].zoomAnchor||50)/100;
  const dW=w*z,dH=h*z,baseX=(1280-w)/2,baseY=(720-h)/2;
- g.save();g.beginPath();g.rect(0,0,1280,720);g.clip();g.drawImage(v,baseX+w*ax-dW*ax,baseY+h/2-dH/2,dW,dH);g.restore()}}g.globalAlpha=1;$('export').textContent='Запись '+Math.floor(t/total*100)+'%';requestAnimationFrame(draw)};requestAnimationFrame(draw);notice('Экспорт идёт в реальном времени. Не закрывай вкладку.')}catch(e){exporting=false;$('export').disabled=false;$('export').textContent='Экспорт WebM';if(ctx)ctx.close();notice('Экспорт не выполнен: '+e.message)}}
+ g.save();g.beginPath();g.rect(0,0,1280,720);g.clip();g.filter=gradeFilter(clips[e.i]);g.drawImage(v,baseX+w*ax-dW*ax,baseY+h/2-dH/2,dW,dH);g.restore()}}g.globalAlpha=1;$('export').textContent='Запись '+Math.floor(t/total*100)+'%';requestAnimationFrame(draw)};requestAnimationFrame(draw);notice('Экспорт идёт в реальном времени. Не закрывай вкладку.')}catch(e){exporting=false;$('export').disabled=false;$('export').textContent='Экспорт WebM';if(ctx)ctx.close();notice('Экспорт не выполнен: '+e.message)}}
 $('addVideos').onchange=async e=>{await addFiles([...e.target.files]);applyProject();e.target.value=''};$('addAudio').onchange=async e=>{const f=e.target.files[0];if(!f)return;vmAudioFile=f;if(audioUrl)URL.revokeObjectURL(audioUrl);audioUrl=assetURL(f);$('audio').src=audioUrl;$('audio').dataset.filename=f.name;$('audioName').textContent=f.name;$('audio').onloadedmetadata=()=>{renderTimeline();$('audioName').textContent=f.name+' · '+fmt($('audio').duration)};peaks=[]};$('assets').onclick=e=>{const b=e.target.closest('[data-add]');if(!b)return;const a=assets.find(x=>x.id===b.dataset.add);clips.push({assetId:a.id,in:0,out:a.duration,transition:0,kind:'cut',label:a.file.name});render()};$('clipList').onchange=e=>{const el=e.target.closest('[data-field]');if(!el)return;const c=clips[+el.dataset.i],f=el.dataset.field;if(['in','out','transition'].includes(f)){let v=Number(el.value);if(!Number.isFinite(v))return;if(f==='in')v=Math.min(Math.max(0,v),c.out-.12);if(f==='out')v=Math.max(c.in+.12,Math.min(v,aFor(c).duration));if(f==='transition')v=Math.min(2,Math.max(0,v));c[f]=v}else c[f]=el.value;render()};$('clipList').onclick=e=>{let b=e.target.closest('button');if(!b)return;for(const kind of ['up','down','del'])if(b.dataset[kind]!==undefined){let i=+b.dataset[kind];if(kind==='del'){clips.splice(i,1);selected=Math.max(0,Math.min(selected,clips.length-1))}else{let j=i+(kind==='up'?-1:1);if(j>=0&&j<clips.length)[clips[i],clips[j]]=[clips[j],clips[i]]}render();return}const row=e.target.closest('.cliprow');if(row&&!e.target.closest('input,select'))select([...row.parentNode.children].indexOf(row))};$('track').onclick=e=>{const s=e.target.closest('[data-clip]');if(s)select(+s.dataset.clip);else {const rect=$('track').getBoundingClientRect();seek((e.clientX-rect.left)/parseFloat($('timeline').style.getPropertyValue('--scale')||9))}};$('timeline').onclick=e=>{if(e.target.id==='ruler'||e.target.id==='musicTrack'){const x=e.clientX-e.target.getBoundingClientRect().left;seek(x/parseFloat($('timeline').style.getPropertyValue('--scale')||9))}};$('seek').oninput=e=>{stop();seek(+e.target.value)};$('play').onclick=play;$('stop').onclick=()=>{stop();seek(0)};$('mute').onchange=e=>$('audio').muted=e.target.checked;$('volume').oninput=e=>$('audio').volume=+e.target.value;$('auto').onclick=autoArrange;$('beats').onclick=detectBeats;$('fitMusic').onclick=fitMusic;$('downloadLast').onclick=()=>downloadData(aFor(clips[selected])?.last,`scene_${selected+1}_END.png`);$('downloadFirst').onclick=()=>downloadData(aFor(clips[selected+1])?.first,`scene_${selected+2}_START.png`);$('shotSheet').onclick=shotSheet;$('aiReport').onclick=aiReport;$('save').onclick=saveProject;$('loadProject').onchange=e=>{if(e.target.files[0])loadProject(e.target.files[0])};$('export').onclick=exportVideo;render();
 
 $('addFolder').onchange=async e=>{
@@ -285,6 +337,16 @@ $('addFolder').onchange=async e=>{
  render();notice(`Из папки добавлено ${videos.length} видео и ${songs.length?'одна музыкальная дорожка':'ни одной песни'}.`);e.target.value='';
 };
 $('smartEdit').onclick=smartEdit; $('undoSmart').onclick=()=>{if(!vmBeforeSmart)return;clips.splice(0,clips.length,...vmBeforeSmart.map(c=>({...c})));vmBeforeSmart=null;$('undoSmart').disabled=true;render();seek(0);notice('Автоподгонка отменена.')};
+
+$('zoomEditor').addEventListener('click',e=>{
+ if(e.target.id==='gradeReset'){
+  const c=clips[selected];if(!c)return;resetGrade(c);render();loadPreview(playhead);
+ }else if(e.target.id==='gradeAuto'){autoGrade();}
+ else if(e.target.id==='gradeUndo'&&vmBeforeGrade){
+  clips.forEach((c,i)=>{if(vmBeforeGrade[i])Object.assign(c,vmBeforeGrade[i])});
+  vmBeforeGrade=null;render();loadPreview(playhead);notice('Цвет восстановлен.');
+ }
+});
 $('zoomEditor').onchange=e=>{const el=e.target.closest('[data-zoom]'),c=clips[selected];if(!el||!c)return;c[el.dataset.zoom]=Number(el.value);render();seek(playhead)};
 $('zoomEditor').oninput=e=>{const el=e.target.closest('[data-zoom]'),c=clips[selected];if(!el||!c)return;c[el.dataset.zoom]=Number(el.value);renderZoomEditor();vmSchedule();loadPreview(playhead)};
 
@@ -386,61 +448,6 @@ vmRestore();
 
 
 // Montage AI adapter: available ONLY through the local bridge server.
-let montageBusy=false;
-const MSTATUS=$('montageStatus'), MBAR=$('montageBar');
-function montageNote(msg,percent){MSTATUS.textContent=msg;if(Number.isFinite(percent))MBAR.style.width=Math.min(100,Math.max(0,percent))+'%'}
-async function bridgeFetch(path,options={}){
- const r=await fetch(path,options);const txt=await r.text();let data={};
- try{data=txt?JSON.parse(txt):{}}catch{data={message:txt.slice(0,350)}}
- if(!r.ok)throw Error(data.error||data.message||'HTTP '+r.status);
- return data;
-}
-async function montageCheck(){
- if(!['localhost','127.0.0.1'].includes(location.hostname)){montageNote('Открой локальную версию через py launch_studio.py — GitHub Pages не подключён к Docker.');return false}
- try{const health=await bridgeFetch('/bridge/health');if(!health.montage?.online){montageNote('Локальный мост работает, но Montage AI недоступен. Запусти Docker и docker compose up (порт 8080).');return false}montageNote('● Montage AI подключён · '+(health.montage.version||'локальный движок'));return true}catch(e){montageNote('Мост не запущен. Запусти: py launch_studio.py · '+e.message);return false}
-}
-$('montageCheck').onclick=montageCheck;
-$('montageRun').onclick=async()=>{
- if(montageBusy)return;
- if(!clips.length||!vmAudioFile){montageNote('Сначала добавь видео и музыкальную дорожку.');return}
- if(!await montageCheck())return;
- if(!confirm('Отправить выбранные исходники локальному Montage AI на этом компьютере? Движок создаст отдельный автоматический вариант и может изменить порядок сцен. Текущий таймлайн Videomaker останется прежним.'))return;
- const button=$('montageRun');montageBusy=true;button.disabled=true;$('montageLink').style.display='none';MBAR.style.width='0%';
- try{
-  const unique=[...new Set(clips.map(c=>c.assetId))].map(id=>assets.find(a=>a.id===id));
-  for(let i=0;i<unique.length;i++){
-   const a=unique[i];montageNote(`Передаю клип ${i+1} из ${unique.length}: ${a.file.name}`,3+Math.round(i/unique.length*32));
-   const h={'Content-Type':a.file.type||'application/octet-stream','X-VM-Name':encodeURIComponent(a.file.name),'X-VM-Type':'video'};
-   await bridgeFetch('/bridge/upload',{method:'POST',headers:h,body:a.file});
-  }
-  montageNote('Передаю музыку…',36);
-  await bridgeFetch('/bridge/upload',{method:'POST',headers:{'Content-Type':vmAudioFile.type||'application/octet-stream','X-VM-Name':encodeURIComponent(vmAudioFile.name),'X-VM-Type':'music'},body:vmAudioFile});
-  montageNote('Запускаю анализ сцен и музыкального ритма…',42);
-  const response=await bridgeFetch('/bridge/jobs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({style:$('montageStyle').value,prompt:$('montagePrompt').value,quality_profile:'standard',export_timeline:$('montageTimeline').checked,cloud_acceleration:false})});
-  const id=response.job_id||response.id||response.job?.id;
-  if(!id){montageNote('Монтаж запущен. Сервер не вернул ID задачи: '+JSON.stringify(response).slice(0,180),50);return}
-  for(let retry=0;retry<900;retry++){
-   await new Promise(res=>setTimeout(res,2000));
-   const job=await bridgeFetch('/bridge/jobs/'+encodeURIComponent(id));
-   const raw=job.job||job;const state=String(raw.status||raw.state||'working').toLowerCase();
-   const progress=Number(raw.progress??raw.percent??0);
-   montageNote(`Montage AI · ${state} ${Number.isFinite(progress)&&progress?'· '+Math.round(progress)+'%':''}`,45+Math.min(47,Math.max(0,progress)*.47));
-   if(['failed','error','cancelled','canceled'].includes(state))throw Error(raw.error||raw.message||'Задача Montage AI завершилась с ошибкой');
-   if(['completed','complete','finished','done','success','succeeded'].includes(state)){
-    const files=raw.output_files||raw.files||raw.outputs||[];
-    let name=raw.output_file||raw.filename||raw.output_filename||raw.output_video||raw.result_file;
-    if(!name&&Array.isArray(files))name=files.find(f=>typeof f==='string'&&/\.mp4$/i.test(f))||(files.find(f=>/\.mp4$/i.test(f?.filename||f?.name||''))?.filename);
-    if(name){name=String(name).split(/[\/]/).pop();$('montageLink').href='/bridge/download/'+encodeURIComponent(name);$('montageLink').style.display='inline-block';montageNote('✓ Монтаж готов. Скачать MP4.',100)}
-    else montageNote('✓ Монтаж завершён. Имя MP4 не найдено в ответе, открой выходную папку Montage AI.',100);
-    return;
-   }
-  }
-  throw Error('Превышено время ожидания статуса. Проверь результат в Montage AI.');
- }catch(e){montageNote('Ошибка: '+e.message)}finally{montageBusy=false;button.disabled=false}
-};
-if(['localhost','127.0.0.1'].includes(location.hostname))setTimeout(montageCheck,600);
-
-
 /* Optional browser ML module; existing editor remains functional if model fails. */
 document.getElementById('directorRun').addEventListener('click',async()=>{
   const btn=document.getElementById('directorRun');
