@@ -1,5 +1,5 @@
 // Browser-only draft timeline builder. Never deletes source files or rewrites footage.
-export const DRAFT_VERSION='0.2.0';
+export const DRAFT_VERSION='0.3.0';
 const f=x=>Number(x).toFixed(2);
 const clone=x=>({...x});
 const span=c=>Math.max(0,c.out-c.in);
@@ -23,12 +23,28 @@ function bestBeat(beats,time){
  }
  return chosen;
 }
-export function buildDraft({clips,assets,peaks=[],edits={}}){
+export function buildDraft({clips,assets,peaks=[],edits={},review=[]}){
  const media=new Map(assets.map(a=>[a.id,a]));
  const warnings=[],actions=[],draft=[];
  for(let i=0;i<clips.length;i++){
   const c=clone(clips[i]),asset=media.get(c.assetId),e=edits[i]||{};
   if(!asset){warnings.push('Клип '+(i+1)+': исходник не найден');continue}
+  if(e.style&&e.style!=='keep'){
+   let style=e.style;
+   const finding=review[i];
+   if(style==='auto'){
+     // Never synthesize a flashy transition because a subject moved unexpectedly.
+     // If uncertain, prefer a hard cut. A short dip can conceal an obvious tonal discontinuity.
+     const strongVisualDifference=finding?.visual?.assessed&&finding.visual.score>.18;
+     style=strongVisualDifference?'dip':'cut';
+   }
+   if(['cut','dip','flash'].includes(style)){
+     if(c.kind!==style||(style!=='cut'&&c.transition!==.3)){
+       c.kind=style;c.transition=style==='cut'?0:.3;
+       actions.push('Сцена '+(i+1)+': переход '+(style==='dip'?'короткое затемнение':style==='flash'?'короткая вспышка':'жёсткая склейка'));
+     }
+   }
+  }
   if(e.exclude){
    actions.push('Исключена сцена '+(i+1)+' «'+c.label+'» по выбору пользователя');
    continue;
@@ -65,7 +81,7 @@ export function buildDraft({clips,assets,peaks=[],edits={}}){
  }
  // Avoid a montage longer than the available track; do not synthesize or loop footage.
  const after=starts(draft);
- const compare=clips.length!==draft.length||draft.some((c,i)=>c.in!==clips[i]?.in||c.out!==clips[i]?.out||c.assetId!==clips[i]?.assetId||c.label!==clips[i]?.label);
+ const compare=clips.length!==draft.length||draft.some((c,i)=>c.in!==clips[i]?.in||c.out!==clips[i]?.out||c.assetId!==clips[i]?.assetId||c.label!==clips[i]?.label||c.kind!==clips[i]?.kind||c.transition!==clips[i]?.transition);
  return {clips:draft,actions,warnings,changed:compare,originalDuration:starts(clips).total,
    newDuration:after.total,missingSongPart:null};
 }
@@ -80,6 +96,12 @@ export function draftPanel(clips){
  '<input type="number" step="0.01" min="'+c.in+'" max="'+c.out+'" placeholder="Начало, с" data-draft-start="'+i+'" style="width:115px">'+
  '<span>—</span><input type="number" step="0.01" min="'+c.in+'" max="'+c.out+'" placeholder="Конец, с" data-draft-end="'+i+'" style="width:115px">'+
  '<small>Диапазон ролика: '+f(c.in)+'–'+f(c.out)+' с</small></div>'+
+ '<label class="hint" style="display:flex;align-items:center;gap:8px;margin-top:7px">Переход после сцены: <select data-draft-transition="'+i+'">'+
+ '<option value="auto">Авто (без рискованных эффектов)</option>'+
+ '<option value="keep">Оставить текущий</option>'+
+ '<option value="cut">Жёсткая склейка</option>'+
+ '<option value="dip">Затемнение 0,3 с</option>'+
+ '<option value="flash">Вспышка 0,3 с</option></select></label>'+
  '<button type="button" class="mini" style="margin-top:7px" data-draft-inspect="'+i+'">◈ Найти визуальные аномалии</button><div data-draft-scan-result="'+i+'" class="hint muted"></div></div>').join('')+
  '<div class="toolbar"><button type="button" class="primary" id="draftGenerate">✦ Собрать предложение</button></div>'+
  '<div id="draftResult" aria-live="polite" class="hint"></div>';
