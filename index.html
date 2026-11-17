@@ -374,7 +374,7 @@ $('zoomEditor').addEventListener('click',e=>{
  }
 });
 $('zoomEditor').onchange=e=>{const el=e.target.closest('[data-zoom]'),c=clips[selected];if(!el||!c)return;c[el.dataset.zoom]=Number(el.value);render();seek(playhead)};
-$('zoomEditor').oninput=e=>{const el=e.target.closest('[data-zoom]'),c=clips[selected];if(!el||!c)return;c[el.dataset.zoom]=Number(el.value);renderZoomEditor();vmSchedule();loadPreview(playhead)};
+$('zoomEditor').oninput=e=>{const el=e.target.closest('[data-zoom]'),c=clips[selected];if(!el||!c)return;c[el.dataset.zoom]=Number(el.value);const b=el.closest('label')?.querySelector('b');if(b){const k=el.dataset.zoom;b.textContent=k==='zoomEnd'?Number(el.value).toFixed(1)+'×':k==='gradeWarmth'?Math.round(Number(el.value)*100)+'%':k.startsWith('grade')?Math.round(Number(el.value)*100)+'%':b.textContent}vmSchedule();loadPreview(playhead)};
 
 
 function vmCrcUpdate(crc,data){
