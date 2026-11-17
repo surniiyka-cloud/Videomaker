@@ -133,6 +133,7 @@ header .actions button,header .actions .drop{font-size:11px;padding:7px 9px!impo
 <h2>AI DIRECTOR / TRANSFORMERS.JS</h2>
 <p class="hint muted">ИИ-модель CLIP анализирует начало и конец каждого клипа в браузере. Первый запуск скачивает модель; исходные видео не отправляются в GitHub.</p>
 <button class="primary" id="directorRun" type="button">✦ Анализировать сцены</button>
+<button id="motionRun" type="button">◈ Анализировать движение</button><p class="hint muted" id="motionStatus">Для оценки перемещения объектов и возможного параллакса.</p><div id="motionResults" style="display:grid;gap:7px;max-height:260px;overflow:auto"></div>
 <p class="hint muted" id="directorStatus" aria-live="polite">Ожидает запуска · экспериментальная функция</p>
 <div id="directorResults" style="display:grid;gap:7px;max-height:260px;overflow:auto"></div>
 </section>
@@ -465,6 +466,28 @@ document.getElementById('directorRun').addEventListener('click',async()=>{
     window.vmDirectorResults=results;
   }catch(err){status.textContent='Анализ не запустился: '+String(err?.message||err)}
   finally{btn.disabled=false}
+});
+
+
+document.getElementById('motionRun').addEventListener('click',async()=>{
+ const btn=document.getElementById('motionRun');
+ const status=document.getElementById('motionStatus');
+ const target=document.getElementById('motionResults');
+ if(!clips.length){status.textContent='Сначала загрузи ролики.';return}
+ btn.disabled=true;target.innerHTML='';
+ try{
+  const m=await import('./motion_analysis.js');
+  const shots=clips.map(c=>{const a=aFor(c);return {
+   label:c.label||a?.file.name||'Без названия',
+   in:c.in,out:c.out,
+   capture:t=>grabFrame(a.url,t)
+  }});
+  const result=await m.analyzeMotion(shots,t=>status.textContent=t);
+  window.vmMotionResults=result;
+  target.innerHTML=m.describeMotion(result);
+  status.textContent='Готово. Показано экранное смещение, не точная траектория камеры. Результаты приблизительные.';
+ }catch(e){status.textContent='Ошибка: '+String(e?.message||e)}
+ finally{btn.disabled=false}
 });
 
 </script></body></html>
