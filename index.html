@@ -52,15 +52,81 @@ h2{font-size:12px;letter-spacing:.25px;color:#d9deec;font-weight:750;margin-bott
 @media(max-width:1080px){.layout{grid-template-columns:240px minmax(0,1fr)}.split{grid-template-columns:1fr}.layout>aside{position:static;max-height:none}}
 @media(max-width:770px){.app{padding:0 9px 20px}.layout{grid-template-columns:1fr}.layout>aside{max-height:none}.actions{flex-wrap:wrap}header{position:relative}.panel{padding:11px}.stage{border-radius:6px}}
 
+
+/* Studio v4.1: stability and responsive editor layout */
+html{min-width:320px;scrollbar-gutter:stable}
+body{overflow-x:hidden}
+.app{width:100%;max-width:1920px;margin-inline:auto;padding:0 14px 24px}
+header{position:relative;top:auto;min-height:72px;display:grid;grid-template-columns:minmax(220px,1fr) minmax(0,2.6fr);align-items:center;gap:16px;padding:12px 2px;margin-bottom:12px}
+header>div:first-child{min-width:0}header h1{font-size:clamp(17px,1.5vw,23px)}
+header .actions{min-width:0;justify-content:flex-end;display:flex;flex-wrap:wrap}
+header .actions button,header .actions .drop{font-size:11px;padding:7px 9px!important}
+.layout{display:grid;grid-template-columns:clamp(242px,19.5vw,310px) minmax(0,1fr);grid-auto-flow:row;align-items:stretch;gap:12px}
+.layout>aside.panel{position:static;top:auto;min-width:0;max-height:calc(100vh - 105px);min-height:480px;overflow-y:auto;overflow-x:hidden}
+.layout>main.panel{display:flex;flex-direction:column;min-width:0;min-height:0;align-items:stretch;justify-content:flex-start;padding:13px 16px}
+.layout>main.panel>.toolbar{flex:0 0 auto}
+.stage{height:min(48vh,520px);width:auto;aspect-ratio:16/9;max-width:100%;max-height:none;margin:8px auto 10px;flex:0 0 auto}
+.stage video{object-fit:contain}
+.playbar{width:100%;max-width:1100px;margin:6px auto;flex:0 0 auto}
+.progress{width:100%;max-width:1100px;display:block;margin:6px auto}
+.layout>main.panel>.info{width:100%;max-width:1100px;margin:8px auto 0!important;flex:0 0 auto}
+.panel.full{grid-column:1/-1;min-width:0;margin-top:0}
+.timeline{max-width:100%;width:100%;height:177px;min-height:0;overflow-x:auto;overflow-y:hidden;scrollbar-color:#525770 #11151e}
+.timeline .ruler{height:27px}.timeline .track{height:65px;margin-top:8px}.timeline .segment{height:55px}
+.timeline .musicTrack{height:28px;margin-top:9px}
+.layout>.panel.full:last-child{margin-bottom:0}
+.split{grid-template-columns:minmax(0,1fr) clamp(290px,28vw,380px);gap:16px}
+.split>div,.split>aside{min-width:0}
+.cliplist{width:100%;overflow-x:auto}
+.cliprow{min-width:790px}
+.frames{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.frame img{width:100%;min-height:65px;aspect-ratio:16/9;object-fit:contain}
+#montageDisclosure{background:#171922;border:1px solid #343047;border-radius:9px;margin-top:16px;overflow:hidden}
+#montageDisclosure>summary{list-style:none;cursor:pointer;padding:12px 10px;color:#d0c4ff;font-weight:750;display:flex;flex-direction:column;gap:5px}
+#montageDisclosure>summary::-webkit-details-marker{display:none}
+#montageDisclosure>summary:before{content:"▸";margin-right:8px;display:inline}
+#montageDisclosure[open]>summary:before{content:"▾"}
+.engine-hint{font-size:10px;color:#8d91a7;font-weight:400}
+#montagePanel{margin:0;border:0;border-top:1px solid #343047;border-radius:0;padding:10px}
+#montagePanel textarea{min-height:76px}
+#assets{max-height:min(36vh,350px)}
+#studioHint{overflow-wrap:anywhere}
+@media(max-width:1180px){
+ header{grid-template-columns:1fr;gap:10px}
+ header .actions{justify-content:flex-start}
+ .layout{grid-template-columns:240px minmax(0,1fr)}
+ .stage{height:min(42vh,450px)}
+ .split{grid-template-columns:minmax(0,1fr)}
+ .layout>aside.panel{max-height:calc(100vh - 160px)}
+}
+@media(max-width:780px){
+ .app{padding:0 10px 20px}
+ header{display:flex;flex-wrap:wrap;gap:8px}
+ header .actions{width:100%}
+ .layout{grid-template-columns:1fr}
+ .layout>aside.panel{max-height:none;min-height:0;overflow:visible}
+ .layout>main.panel{min-height:0}
+ .stage{height:auto;width:100%;max-width:720px;aspect-ratio:16/9}
+ .panel.full{grid-column:1}
+ .split{grid-template-columns:1fr}
+ .assets{max-height:240px}
+}
+@media(max-width:450px){
+ header .actions button,header .actions .drop{font-size:10px;padding:6px!important}
+ .playbar{justify-content:flex-start}
+ .stage{margin-block:5px}
+ .timeline{height:165px}
+}
+
 </style></head><body><div class="app"><header><div><div class="eyebrow">VIDEOMAKER / CREATIVE WORKSPACE · v4</div><h1>VIDEOMAKER <span>/</span> STUDIO</h1><small>Монтажная · исходники · музыка · AI-движок Montage</small></div><div class="actions"><span id="autosaveStatus" style="font-size:12px;color:#a8c5a8">◌ Восстановление…</span><button id="resetLocal" title="Удалить локально сохранённый проект">Очистить проект</button><button id="aiReport">↓ AI-отчёт по монтажу</button><button id="aiPackage" class="primary">↓ Пакет для ChatGPT ZIP</button><button id="save">↓ Проект JSON</button><label class="drop" style="padding:9px 12px;border-style:solid">↑ Открыть проект<input id="loadProject" type="file" accept=".json"></label><button class="primary" id="export">Экспорт WebM</button></div></header>
-<div class="layout"><aside class="panel"><h2>МЕДИАТЕКА <span class="badge">01</span></h2><label class="drop">＋ Добавить видео (MP4, WebM, MOV*)<input id="addVideos" type="file" multiple accept="video/*,.mov"></label><label class="drop" style="margin-top:8px">📁 Загрузить целую папку с видео и музыкой<input id="addFolder" type="file" webkitdirectory directory multiple></label><p class="hint muted">Файлы остаются в браузере. Выбирай клипы в порядке монтажа или меняй их ниже. *MOV зависит от поддержки браузера.</p><div id="assets" class="assets"></div><div style="margin-top:20px"><h2>АУДИО <span class="badge">02</span></h2><label class="drop">♫ Загрузить песню (WAV, MP3, M4A)<input id="addAudio" type="file" accept="audio/*"></label><p id="audioName" class="hint muted">Музыка не загружена</p><div class="toolbar"><button class="mini" id="auto">Авторасстановка</button><button class="mini" id="smartEdit">◈ Подобрать границы</button><button class="mini" id="undoSmart" disabled>↶ Отменить подгонку</button><button class="mini" id="beats">Найти акценты</button></div><p class="hint muted">Локальная подгонка помогает искать точки резкой склейки. Для полноценного автоматического монтажа используй движок Montage AI ниже.</p></div><section id="montagePanel"><div class="tag">LOCAL ENGINE · WINDOWS</div><h2>✦ Montage AI</h2><p class="hint muted">Автомонтаж под музыку на компьютере. Требует запущенного Docker / Montage AI и локального моста Videomaker.</p>
+<div class="layout"><aside class="panel"><h2>МЕДИАТЕКА <span class="badge">01</span></h2><label class="drop">＋ Добавить видео (MP4, WebM, MOV*)<input id="addVideos" type="file" multiple accept="video/*,.mov"></label><label class="drop" style="margin-top:8px">📁 Загрузить целую папку с видео и музыкой<input id="addFolder" type="file" webkitdirectory directory multiple></label><p class="hint muted">Файлы остаются в браузере. Выбирай клипы в порядке монтажа или меняй их ниже. *MOV зависит от поддержки браузера.</p><div id="assets" class="assets"></div><div style="margin-top:20px"><h2>АУДИО <span class="badge">02</span></h2><label class="drop">♫ Загрузить песню (WAV, MP3, M4A)<input id="addAudio" type="file" accept="audio/*"></label><p id="audioName" class="hint muted">Музыка не загружена</p><div class="toolbar"><button class="mini" id="auto">Авторасстановка</button><button class="mini" id="smartEdit">◈ Подобрать границы</button><button class="mini" id="undoSmart" disabled>↶ Отменить подгонку</button><button class="mini" id="beats">Найти акценты</button></div><p class="hint muted">Локальная подгонка помогает искать точки резкой склейки. Для полноценного автоматического монтажа используй движок Montage AI ниже.</p></div><details id="montageDisclosure"><summary>✦ Montage AI <span class="engine-hint">Дополнительный локальный движок · по желанию</span></summary><section id="montagePanel"><div class="tag">LOCAL ENGINE · WINDOWS</div><h2>✦ Montage AI</h2><p class="hint muted">Автомонтаж под музыку на компьютере. Требует запущенного Docker / Montage AI и локального моста Videomaker.</p>
 <div class="field"><label for="montageStyle">Режиссёрский стиль</label><select id="montageStyle"><option value="dynamic">Dynamic · развитие истории</option><option value="hitchcock">Cinematic · напряжение и раскрытие</option><option value="mtv">MTV · музыкальные удары</option><option value="action">Action · динамичные сцены</option><option value="minimalist">Minimal · спокойный монтаж</option></select></div>
 <div class="field"><label for="montagePrompt">Задача монтажёру</label><textarea id="montagePrompt">Кинематографичный музыкальный клип: сохранить смысловую последовательность событий и узнаваемость героя; избегать растворений с двоящимися зданиями и лицами; музыкальные акценты важнее случайных переходов.</textarea></div>
 <label class="check"><input id="montageTimeline" type="checkbox" checked> Экспорт монтажной шкалы</label>
 <div id="montageProgress"><div id="montageBar"></div></div><div id="montageStatus">Движок не проверен</div>
 <button id="montageCheck">Проверить подключение</button><button class="primary" id="montageRun">✦ Создать монтаж через Montage AI</button>
 <a id="montageLink" download="montage-result.mp4">↓ Скачать результат MP4</a>
-<div id="studioHint">Запуск: <code>py launch_studio.py</code> · затем открой http://127.0.0.1:8765. Версия GitHub Pages не умеет обращаться к локальному движку без моста.</div></section></aside>
+<div id="studioHint">Запуск: <code>py launch_studio.py</code> · затем открой http://127.0.0.1:8765. Версия GitHub Pages не умеет обращаться к локальному движку без моста.</div></section></details></aside>
 <main class="panel"><div class="toolbar" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">ПРОГРАММНЫЙ МОНИТОР</h2><span class="status" id="status">Ожидаю исходники</span></div><div class="stage" id="stage"><video id="v1" playsinline preload="auto" muted></video><video id="v2" playsinline preload="auto" muted style="opacity:0"></video><div class="placeholder" id="placeholder">Загрузи первые ролики и песню<br>Чтобы увидеть фильм на монтажной шкале</div></div><div class="playbar"><button id="play">▶ Воспроизвести</button><button id="stop">■</button><span class="time" id="time">00:00.00 / 00:00.00</span><label class="check"><input type="checkbox" id="mute"> Без музыки</label><label class="check">Громкость <input id="volume" type="range" min="0" max="1" step="0.05" value="0.8"></label></div><input id="seek" class="progress" type="range" min="0" max="1" step=".01" value="0"><audio id="audio" preload="auto"></audio><div class="info" style="margin-top:12px">🎞 <b>Проверка переходов:</b> выбери два соседних клипа. Для плавного перехода лучше совпадение направления движения, горизонта и масштаба. Автоматическое растворение сглаживает стык, но не создаёт физически непрерывный пролёт камеры.</div></main>
 <section class="panel full"><div class="toolbar" style="justify-content:space-between"><h2>ТАЙМЛАЙН <span class="badge">VIDEO 1 + AUDIO 1</span></h2><div class="toolbar"><span class="badge" id="totalLabel">0 клипов</span><button class="mini" id="fitMusic">Подогнать последний под песню</button></div></div><div class="timeline" id="timeline"><div class="ruler" id="ruler"></div><div class="track" id="track"></div><div class="musicTrack" id="musicTrack"><div class="wave"></div></div><div class="cursor" id="cursor"></div></div><div class="foot">Кликни по клипу на шкале, чтобы выбрать его. Для точной подгонки меняй обрезку и переходы в списке. Шкала перерисовывается автоматически.</div></section>
 <section class="panel full"><div class="split"><div><h2>СЦЕНЫ И ТОЧНАЯ ОБРЕЗКА</h2><div class="cliplist" id="clipList"><div class="muted hint">Здесь появятся добавленные клипы.</div></div></div><aside><h2>ИНСПЕКТОР СКЛЕЙКИ</h2><div class="frames"><div class="frame"><small>Последний кадр выбранного</small><img id="lastFrame" alt="Последний кадр"><button class="mini" id="downloadLast" disabled>↓ PNG</button></div><div class="frame"><small>Первый кадр следующего</small><img id="nextFrame" alt="Первый кадр"><button class="mini" id="downloadFirst" disabled>↓ PNG</button></div></div><p class="hint muted" id="frameHint">Выбери клип: здесь увидишь границу склейки.</p><div class="info">💡 Для Runway лучше готовить следующий стартовый референс на основе последнего кадра предыдущей анимации. Эти PNG можно прикреплять в чат для совместной режиссуры.</div><div class="toolbar" style="margin-top:12px"><button id="shotSheet" class="mini">↓ Лист перехода PNG</button></div><div class="info" id="smartSummary" style="margin-top:10px">Автоанализ ещё не проводился.</div><div id="zoomEditor" class="zoomEditor" style="margin-top:14px"></div></aside></div></section></div><div class="foot">Videomaker MVP · Обработка локально, видео не отправляются на сервер · Экспорт WebM идёт в реальном времени; для финального MP4/H.264 при необходимости перекодируй файл в редакторе.</div></div><div class="toast" id="toast"></div>
