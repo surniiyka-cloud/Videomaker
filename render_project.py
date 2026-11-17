@@ -83,6 +83,17 @@ def render(archive: Path, output: Path, width=1920, height=1080, fps=24, crf=18)
                 chain += (f",zoompan=z='{z}':"
                           f"x='(iw-iw/zoom)*{anchor:.4f}':"
                           f"y='(ih-ih/zoom)/2':d=1:s={width}x{height}:fps={fps}")
+            # Approximate browser CSS grade in FFmpeg. Browser sepia is not an exact
+            # match to colorbalance; defaults are neutral and backward-compatible.
+            brightness = max(.75, min(1.25, safe_number(c.get('gradeBrightness'), 1)))
+            contrast = max(.75, min(1.25, safe_number(c.get('gradeContrast'), 1)))
+            saturation = max(.5, min(1.5, safe_number(c.get('gradeSaturation'), 1)))
+            warmth = max(0, min(.35, safe_number(c.get('gradeWarmth'), 0)))
+            if abs(brightness-1)>.001 or abs(contrast-1)>.001 or abs(saturation-1)>.001:
+                chain += (f',eq=brightness={(brightness-1)*.7:.4f}:'
+                          f'contrast={contrast:.4f}:saturation={saturation:.4f}')
+            if warmth>.001:
+                chain += f',colorbalance=rs={warmth*.25:.4f}:bs={-warmth*.25:.4f}'
             chain += f',format=yuv420p[v{i}]'
             chains.append(chain)
         last = 'v0'
