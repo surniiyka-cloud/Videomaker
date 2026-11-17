@@ -1,5 +1,5 @@
 // Experimental local semantic QA. Captions are imperfect: never treat them as ground truth.
-export const SEMANTIC_VERSION='0.2.0';
+export const SEMANTIC_VERSION='0.3.0';
 const MODEL='Xenova/vit-gpt2-image-captioning';
 let captionerPromise;
 const ignore=new Set(['the','a','an','is','are','in','on','of','to','and','with','at','as','it','there','this','that','image','picture','view','front','background','some','many','lot','standing','sitting','looking','large','small','man','person','people']);
@@ -40,6 +40,37 @@ async function getCaptioner(progress){
  }
  return captionerPromise;
 }
+export async function verifyContradictions({clip,asset,notes,capture,signature,distance,model,progress}){
+ const checked=[];
+ for(const note of notes){
+  // Sample a tighter temporal neighborhood around the flagged frame.
+  const t=note.time,step=Math.min(.30,Math.max(.10,(clip.out-clip.in)/40));
+  const times=[-2,-1,0,1,2].map(k=>Math.min(clip.out-.04,Math.max(clip.in+.04,t+k*step)));
+  const desc=[],vectors=[];
+  for(let i=0;i<times.length;i++){
+   progress?.('Повторная проверка '+(i+1)+'/5 у '+t.toFixed(2)+' с');
+   const [frame,vec]=await Promise.all([capture(asset,times[i]),signature(asset,times[i])]);
+   const output=await model(frame,{max_new_tokens:36});
+   desc.push(String(output?.[0]?.generated_text||'').trim());
+   vectors.push(vec);
+  }
+  const labels=desc.map(personLabel);
+  const core=personLabel(desc[2]);
+  const neighbors=labels.filter((_,i)=>i!==2).filter(Boolean);
+  const opposite=core==='man'?'woman':core==='woman'?'man':null;
+  const sameNear=neighbors.filter(x=>x===core).length;
+  const oppositeNear=neighbors.filter(x=>x===opposite).length;
+  const incoming=distance(vectors[1],vectors[2]),outgoing=distance(vectors[2],vectors[3]);
+  const returnDistance=distance(vectors[1],vectors[3]);
+  const isolatedVisualJump=incoming>.12&&outgoing>.12&&returnDistance<Math.min(incoming,outgoing)*.75;
+  let conclusion='Модель не подтвердила устойчивое противоречие; возможна ошибка описания.';
+  if(core&&oppositeNear>=3)conclusion='Соседние кадры описаны иначе. Требуется проверка реального изображения.';
+  if(sameNear>=2)conclusion='Несколько соседних кадров описаны сходно, первоначальное противоречие неустойчиво.';
+  if(isolatedVisualJump)conclusion='Обнаружен локальный визуальный скачок. Это подозрительный момент, но не доказанная ошибка персонажа.';
+  checked.push({...note,followUp:{times,captions:desc,isolatedVisualJump,conclusion,autoRemove:false}});
+ }
+ return checked;
+}
 export async function inspectStory({clips,assets,capture,signature,distance,progress}){
  const model=await getCaptioner(progress);
  const media=new Map(assets.map(a=>[a.id,a]));
@@ -70,7 +101,9 @@ export async function inspectStory({clips,assets,capture,signature,distance,prog
     anomalies.push({start,end,description:captions[j],reason:'Кратковременное изменение содержания и композиции; нужен просмотр'});
    }
   }
-  const contradictions=checkCaptionContradictions(captions,times);
+  const initialContradictions=checkCaptionContradictions(captions,times);
+  const contradictions=initialContradictions.length?
+    await verifyContradictions({clip:c,asset:a,notes:initialContradictions,capture,signature,distance,model,progress}):[];
   const item={index:i,label:c.label||a.file?.name||'Сцена',captions,times,anomalies,contradictions};
   shots.push(item);
   for(const z of anomalies)flags.push({clipIndex:i,...z});
@@ -85,7 +118,9 @@ export function renderStory(result){
  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  return result.shots.map(s=>'<div style="margin:8px 0;padding:9px;border:1px solid #33445d;border-radius:8px"><b>'+esc(s.label)+'</b>'+
   '<div class="hint">'+s.captions.map((c,i)=>(i+1)+'. '+esc(c)).join('<br>')+'</div>'+
-  (s.contradictions?.length?'<p class="hint" style="color:#f5b37f">Противоречивые описания: '+s.contradictions.map(a=>'кадр '+a.frame+' ('+a.time+' с): '+esc(a.reason)).join('<br>')+'</p>':'')+
+  (s.contradictions?.length?'<div class="hint" style="color:#f5b37f">Перепроверенные противоречия: '+s.contradictions.map(a=>
+    '<p>Кадр '+a.frame+' ('+a.time+' с): '+esc(a.reason)+'<br><b>Повторная проверка:</b> '+esc(a.followUp?.conclusion||'Не проводилась')+
+    '<br>'+a.followUp?.captions?.map((c,i)=>Number(a.followUp.times[i]).toFixed(2)+' с: '+esc(c)).join('<br>')+'</p>').join('')+'</div>':'')+
   (s.anomalies.length?'<p class="hint" style="color:#f5b37f">Подозрительные участки: '+s.anomalies.map(a=>a.start+'–'+a.end+' с').join(', ')+'</p>':'<p class="hint muted">Изолированных визуально-смысловых скачков по редким кадрам не найдено. Непроверенные дефекты возможны.</p>')+'</div>').join('')+
  '<h3 style="margin:12px 0 4px">Связность соседних сцен</h3>'+
  result.joins.map(j=>'<div class="hint">Стык '+(j.index+1)+' → '+(j.index+2)+': '+esc(j.description)+'</div>').join('')+
